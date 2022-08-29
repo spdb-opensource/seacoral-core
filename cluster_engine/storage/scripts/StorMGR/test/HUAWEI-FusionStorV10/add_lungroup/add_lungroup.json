@@ -1,0 +1,27 @@
+{
+  "auth_info": {
+    "vendor": "HUAWEI-FusionStorV10",
+    "ip": "10.134.20.134",
+    "port": 28443,
+    "username": "cmdadmin",
+    "password": "IaaS@PORTAL-CLOUD9!"
+  },
+  "data": {
+    "name": "testLunGroup11",
+    "alloc_type": "SCSI",
+    "luns": [
+      {
+        "name": "testLun11",
+        "capacity_MB": 102400,
+        "storagepool_name": "0",
+        "description": "lun description"
+      },
+      {
+        "name": "testLun12",
+        "capacity_MB": 102400,
+        "storagepool_name": "0",
+        "description": "lun description"
+      }
+    ]
+  }
+}

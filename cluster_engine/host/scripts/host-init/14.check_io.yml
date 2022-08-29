@@ -1,0 +1,6 @@
+- name: node check io
+  hosts: all
+  roles:
+  - machine_benchmark
+  vars:
+    test_dir: /fio_test

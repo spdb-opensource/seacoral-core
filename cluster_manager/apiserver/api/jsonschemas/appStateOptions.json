@@ -1,0 +1,21 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "state": {
+      "type": "string",
+      "enum": [
+        "passing",
+        "critical",
+        "warn"
+      ]
+    },
+    "modified_user": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "state",
+    "modified_user"
+  ]
+}

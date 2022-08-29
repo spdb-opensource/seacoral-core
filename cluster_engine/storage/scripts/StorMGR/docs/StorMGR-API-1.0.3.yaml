@@ -1,0 +1,744 @@
+openapi: 3.0.0
+servers:
+  - description: HUAWEI OceanStor V3 or V5 manager API
+    url: 'https://virtserver.swaggerhub.com/upmio/StorageManager/1.0.3'
+info:
+  description: HUAWEI OceanStor V3 or V5 manager API
+  version: "1.0.3"
+  title: Storage Manager API
+  contact:
+    email: support@bsgchina.com
+  license:
+    name: Apache 2.0
+    url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
+paths:
+  /storagepool/list:
+    post:
+      summary: storagepool list
+      description: |
+        run shell
+        ```
+        # StorMGR storagepool list ${requestBody_json}
+        ```
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/list_storagepool'
+      responses:
+        '201':
+          description: search results matching criteria
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/storagepool_array'
+  /hostgroup/info:
+    post:
+      summary: hostgroup list
+      description: |
+        run shell
+        ```
+        # StorMGR hostgroup list ${requestBody_json}
+        ```
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/list_hostgroup'
+      responses:
+        '201':
+          description: search results matching criteria
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/hostgroup'
+  /hostgroup/add:
+    post:
+      summary: hostgroup add
+      description: |
+        run shell
+        ```
+        # StorMGR hostgroup add ${requestBody_json}
+        ```
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/add_hostgroup'
+      responses:
+        '201':
+          description: search results matching criteria
+  /hostgroup/delete:
+    post:
+      summary: hostgroup delete
+      description: |
+        run shell
+        ```
+        # StorMGR hostgroup delete ${requestBody_json}
+        ```
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/delete_hostgroup'
+      responses:
+        '201':
+          description: search results matching criteria
+  /lungroup/list:
+    post:
+      summary: lungroup list
+      description: |
+        run shell
+        ```
+        # StorMGR lungroup list ${requestBody_json}
+        ```
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/list_lungroup'
+      responses:
+        '201':
+          description: search results matching criteria
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/lungroup'
+  /lungroup/add:
+    post:
+      summary: lungroup add
+      description: |
+        run shell
+        ```
+        # StorMGR lungroup add ${requestBody_json}
+        ```
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/add_lungroup'
+      responses:
+        '201':
+          description: search results matching criteria
+  /lungroup/expand:
+    post:
+      summary: lungroup expand
+      description: |
+        run shell
+        ```
+        # StorMGR lungroup expand ${requestBody_json}
+        ```
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/add_lungroup'
+      responses:
+        '201':
+          description: search results matching criteria
+  /lungroup/delete:
+    post:
+      summary: lungroup delete
+      description: |
+        run shell
+        ```
+        # StorMGR lungroup delete ${requestBody_json}
+        ```
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/delete_lungroup'
+      responses:
+        '201':
+          description: search results matching criteria
+  /lungroup/add_mapping:
+    post:
+      summary: lungroup add_mapping
+      description: |
+        run shell
+        ```
+        # StorMGR lungroup add_mapping ${requestBody_json}
+        ```
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/add_lungroup_mapping'
+      responses:
+        '201':
+          description: search results matching criteria
+  /lungroup/delete_mapping:
+    post:
+      summary: lungroup delete_mapping
+      description: |
+        run shell
+        ```
+        # StorMGR lungroup delete_mapping ${requestBody_json}
+        ```
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/delete_lungroup_mapping'
+      responses:
+        '201':
+          description: search results matching criteria
+components:
+  schemas:
+    storagepool_array:
+      type: array
+      description: storagepool
+      items:
+        $ref: '#/components/schemas/storagepool'
+    storagepool:
+      type: object
+      description: storagepool
+      required:
+        - id
+        - name
+        - total_capacity_MB
+        - free_capacity_MB
+        - disk_type
+        - health_status
+        - running_status
+        - description
+      properties:
+        id:
+          type: string
+          description: storagepool ID
+          example: 126
+        name:
+          type: string
+          description: storagepool name
+          example: SPWODC008192
+        total_capacity_MB:
+          type: integer
+          format: int64
+          example: 102400
+        free_capacity_MB:
+          type: integer
+          format: int64
+          example: 5120
+        disk_type:
+          type: string
+          default: sas
+          enum:
+            - ssd
+            - sas
+            - sata
+        health_status:
+          type: string
+          enum:
+            - normal
+            - abnormal
+            - degradation
+          example: normal
+        running_status:
+          type: string
+          enum:
+            - online
+            - offline
+            - initializing
+          example: online
+        description:
+          type: string
+          example: storage pool description
+    list_storagepool:
+      type: object
+      required:
+        - auth_info
+        - data
+      properties:
+        auth_info:
+          $ref: '#/components/schemas/auth_info'
+        data:
+          type: object
+          required:
+            - name
+          properties:
+            name:
+              type: string
+              description: >
+                storagepool name, value allow empty, if value is empty, list all
+                storagepool
+              example: SPWODC008190
+    hostgroup:
+      type: object
+      description: hostgroup
+      required:
+        - name
+        - hosts
+        - mapping_lungroup
+      properties:
+        name:
+          type: string
+          description: hostgroup name
+          example: DC008192
+        hosts:
+          type: array
+          items:
+            $ref: '#/components/schemas/host'
+        mapping_lungroup:
+          type: array
+          items:
+            $ref: '#/components/schemas/mapping_lungroup'
+    list_hostgroup:
+      type: object
+      required:
+        - auth_info
+        - data
+      properties:
+        auth_info:
+          $ref: '#/components/schemas/auth_info'
+        data:
+          type: object
+          required:
+            - name
+          properties:
+            name:
+              type: string
+              description: hostgroup name
+              example: DC008192
+    add_hostgroup:
+      type: object
+      required:
+        - auth_info
+        - data
+      properties:
+        auth_info:
+          $ref: '#/components/schemas/auth_info'
+        data:
+          type: object
+          required:
+            - name
+            - hosts
+          properties:
+            name:
+              type: string
+              description: hostgroup name
+              example: DC008192
+            hosts:
+              type: array
+              items:
+                $ref: '#/components/schemas/add_host'
+    delete_hostgroup:
+      type: object
+      required:
+        - auth_info
+        - data
+      properties:
+        auth_info:
+          $ref: '#/components/schemas/auth_info'
+        data:
+          type: object
+          required:
+            - name
+            - hosts_name
+          properties:
+            name:
+              type: string
+              description: hostgroup name
+              example: DC008192
+            hosts_name:
+              type: array
+              description: name of hosts
+              items:
+                type: string
+                example: DC008192
+    lungroup:
+      type: object
+      required:
+        - name
+        - alloc_type
+        - luns
+        - mapping_hostgroup
+      properties:
+        name:
+          type: string
+          description: lungroup name
+          example: LG9129ak12dsjjsswef
+        alloc_type:
+          type: string
+          default: thick
+          enum:
+            - thick
+            - thin
+          example: thick
+        luns:
+          type: array
+          items:
+            $ref: '#/components/schemas/lun'
+        mapping_hostgroup:
+          $ref: '#/components/schemas/mapping_hostgroup'
+    list_lungroup:
+      type: object
+      required:
+        - auth_info
+        - data
+      properties:
+        auth_info:
+          $ref: '#/components/schemas/auth_info'
+        data:
+          type: object
+          required:
+            - name
+          properties:
+            name:
+              type: string
+              description: lungroup name
+              example: LG9129ak12dsjjsswef
+    add_lungroup:
+      type: object
+      required:
+        - auth_info
+        - data
+      properties:
+        auth_info:
+          $ref: '#/components/schemas/auth_info'
+        data:
+          type: object
+          required:
+            - name
+            - alloc_type
+            - luns
+          properties:
+            name:
+              type: string
+              description: lungroup name
+              example: LG9129ak12dsjjsswef
+            alloc_type:
+              type: string
+              default: thick
+              enum:
+                - thick
+                - thin
+            luns:
+              type: array
+              items:
+                $ref: '#/components/schemas/add_lun'
+    expand_lungroup:
+      type: object
+      required:
+        - auth_info
+        - data
+      properties:
+        auth_info:
+          $ref: '#/components/schemas/auth_info'
+        data:
+          type: object
+          required:
+            - name
+            - luns
+          properties:
+            name:
+              type: string
+              description: lungroup name
+              example: LG9129ak12dsjjsswef
+            luns:
+              type: array
+              items:
+                $ref: '#/components/schemas/lun'
+    add_lungroup_mapping:
+      type: object
+      required:
+        - auth_info
+        - data
+      properties:
+        auth_info:
+          $ref: '#/components/schemas/auth_info'
+        data:
+          type: object
+          required:
+            - name
+            - hostgroup_name
+          properties:
+            name:
+              type: string
+              description: lungroup name
+              example: LG9129ak12dsjjsswef
+            hostgroup_name:
+              type: string
+              description: hostgroup name
+              example: HG9129ak12dsjjsswef
+    delete_lungroup_mapping:
+      allOf:
+        - $ref: '#/components/schemas/add_lungroup_mapping'
+    delete_lungroup:
+      type: object
+      required:
+        - auth_info
+        - data
+      properties:
+        auth_info:
+          $ref: '#/components/schemas/auth_info'
+        data:
+          type: object
+          required:
+            - name
+            - luns_id
+          properties:
+            name:
+              type: string
+              description: lungroup name
+              example: LG9129ak12dsjjsswef
+            luns_id:
+              type: array
+              items:
+                type: string
+    mapping_lungroup:
+      type: object
+      required:
+        - name
+        - luns
+      properties:
+        name:
+          type: string
+          example: LG010298u3asf3s
+        luns:
+          type: array
+          items:
+            $ref: '#/components/schemas/lun'
+    mapping_hostgroup:
+      required:
+        - name
+        - hosts
+      properties:
+        name:
+          type: string
+          description: hostgroup name
+          example: DC008192
+        hosts:
+          type: array
+          items:
+            $ref: '#/components/schemas/host'
+    host:
+      type: object
+      description: hostgroup
+      required:
+        - name
+        - ip
+        - os_type
+        - health_status
+        - running_status
+        - initiator
+        - location
+        - description
+        - network_name
+        - model
+      properties:
+        name:
+          type: string
+          description: host name
+          example: DC008192
+        ip:
+          type: string
+          format: ipv4
+          example: 192.168.0.100
+        os_type:
+          type: string
+          default: Linux
+          enum:
+            - Linux
+          example: Linux
+        health_status:
+          type: string
+          enum:
+            - normal
+            - abnormal
+          example: normal
+        running_status:
+          type: string
+          enum:
+            - online
+            - offline
+          example: online
+        initiator:
+          $ref: '#/components/schemas/initiator'
+        location:
+          type: string
+          description: 'host location tag, value allow empty'
+          example: DC001-ROCK001
+        description:
+          type: string
+          description: 'host description, value allow empty'
+          example: host description
+        network_name:
+          type: string
+          description: 'DNS hostname, value allow empty'
+          example: node001.example.com
+        model:
+          type: string
+          description: 'host machine model, value allow empty'
+          example: Dell R720
+    add_host:
+      type: object
+      description: hostgroup
+      required:
+        - name
+        - os_type
+        - initiator
+        - location
+        - description
+        - network_name
+        - ip
+        - model
+      properties:
+        name:
+          type: string
+          description: host name
+          example: DC008192
+        ip:
+          description: host IP address
+          type: string
+          format: ipv4
+          example: 10.0.0.100
+        os_type:
+          type: string
+          default: Linux
+          enum:
+            - Linux
+          example: Linux
+        initiator:
+          $ref: '#/components/schemas/initiator'
+        location:
+          type: string
+          description: 'host location tag, value allow empty'
+          example: rock001
+        description:
+          type: string
+          description: 'host description, value allow empty'
+          example: host description
+        network_name:
+          type: string
+          description: 'DNS hostname, value allow empty'
+          example: node001.example.com
+        model:
+          type: string
+          description: 'host machine model, value allow empty'
+          example: Dell R720
+    initiator:
+      type: object
+      required:
+        - type
+        - id
+      properties:
+        type:
+          type: string
+          description: initiator type
+          default: FC
+          enum:
+            - FC
+          example: FC
+        id:
+          type: array
+          description: >
+            FC HBA port WWN. get form
+            /sys/class/scsi_host/${hostN}/device/fc_host/${hostN}/port_name
+          items:
+            type: string
+            example: 6001438003af1ffc
+    lun:
+      type: object
+      required:
+        - id
+        - name
+        - capacity_MB
+        - storagepool_name
+        - health_status
+        - running_status
+        - description
+      properties:
+        id:
+          type: string
+          description: lun ID
+          example: 216
+        name:
+          type: string
+          description: set object ID or name
+          example: lun description
+        capacity_MB:
+          type: integer
+          format: int64
+          minimum: 100
+          maximum: 10000000
+          example: 1024
+        storagepool_name:
+          type: string
+          description: lun of storagepool name
+          example: SP0192OOIsdf2r
+        health_status:
+          type: string
+          enum:
+            - normal
+            - abnormal
+        running_status:
+          type: string
+          enum:
+            - online
+            - offline
+            - initializing
+        description:
+          type: string
+          description: 'lun description, value allow empty'
+          example: lun description
+    add_lun:
+      type: object
+      required:
+        - name
+        - capacity_MB
+        - storagepool_name
+        - description
+      properties:
+        name:
+          type: string
+          description: set object ID or name
+          example: lun description
+        capacity_MB:
+          type: integer
+          format: int64
+          minimum: 100
+          maximum: 10000000
+          example: 1024
+        storagepool_name:
+          type: string
+          description: lun of storagepool name
+          example: SP0192OOIsdf2r
+        description:
+          type: string
+          description: 'lun description, value allow empty'
+          example: lun description
+    auth_info:
+      type: object
+      required:
+        - vendor
+        - API_version
+        - ip
+        - port
+        - username
+        - password
+      properties:
+        vendor:
+          type: string
+          description: 'Hardware vendor and model'
+          example: HUAWEI-OceanStorV3
+        API_version:
+          type: string
+          description: 'API interface version'
+          example: 1.0.0
+        ip:
+          type: string
+          format: ipv4
+          example: 192.168.0.100
+        port:
+          type: integer
+          format: int64
+          example: 8088
+        username:
+          type: string
+          format: ipv4
+          example: testuser
+        password:
+          type: string
+          format: password
+          example: testpassword

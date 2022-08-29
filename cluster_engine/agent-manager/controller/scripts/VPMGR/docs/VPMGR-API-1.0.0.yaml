@@ -1,0 +1,354 @@
+openapi: 3.0.0
+# Added by API Auto Mocking Plugin
+servers:
+  - description: HUAWEI OceanStor node Volume Path manager API
+    url: https://virtserver.swaggerhub.com/upmio/VolumePathManager/1.0.0
+info:
+  description: HUAWEI OceanStor V3 or V5 manager API
+  version: "1.0.0"
+  title: Volume Path Manager API
+  contact:
+    email: support@bsgchina.com
+  license:
+    name: Apache 2.0
+    url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
+paths:
+  /vp/add:
+    post:
+      summary: |
+        run shell 
+        >>># VPMGR vp add ${requestBody_json}
+      description: |
+        run shell
+        ```
+        # VPMGR vp add ${requestBody_json}
+        ```
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/volumepath'
+      responses:
+        '201':
+          description: search results matching criteria
+
+  /vg/delete:
+    post:
+      summary: |
+        run shell 
+        >>># VPMGR vp delete ${requestBody_json}
+      description: |
+        run shell
+        ```
+        # VPMGR vp delete ${requestBody_json}
+        ```
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/volumepath'
+      responses:
+        '201':
+          description: search results matching criteria
+
+  
+  /vp/expand:
+    post:
+      summary: |
+        run shell 
+        >>># VPMGR vp expand ${requestBody_json}
+      description: |
+        run shell
+        ```
+        # VPMGR vp expand ${requestBody_json}
+        ```
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/expand_volumepath'
+      responses:
+        '201':
+          description: search results matching criteria
+
+  /vp/active:
+    post:
+      summary: |
+        run shell 
+        >>># VPMGR vp active ${requestBody_json}
+      description: |
+        run shell
+        ```
+        # VPMGR vp active ${requestBody_json}
+        ```
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/volumepath'
+      responses:
+        '201':
+          description: search results matching criteria
+          
+  /vp/deactive:
+    post:
+      summary: |
+        run shell 
+        >>># VPMGR vp deactive ${requestBody_json}
+      description: |
+        run shell
+        ```
+        # VPMGR vp deactive ${requestBody_json}
+        ```
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/volumepath'
+      responses:
+        '201':
+          description: search results matching criteria
+  
+  /vp/clean:
+    post:
+      summary: |
+        run shell 
+        >>># VPMGR vp clean ${requestBody_json}
+      description: |
+        run shell
+        ```
+        # VPMGR vp clean ${requestBody_json}
+        ```
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/volumepath'
+      responses:
+        '201':
+          description: search results matching criteria
+          
+components:
+  schemas:
+    get_volumepath_responses:
+      type: object
+      description: volume path
+      required:
+        - name
+        - size_MB
+        - is_existed
+        - lv
+        - vg
+      properties:
+        name:
+          type: string
+          description: volume path name
+          example: VPWODC008192
+        size_MB:
+          type: integer
+          format: int64
+          example: 102400
+        is_existed:
+          type: boolean
+          example: true
+        lv:
+          type: object
+          required:
+            - name
+          properties:
+            name:
+              type: string
+              description: logic volume name 
+              example: LVDC008192
+        vg:
+          type: object
+          required:
+            - name
+          properties:
+            name:
+              type: string
+              description: volume group name 
+              example: VGDC008192
+    get_volumepath:
+      type: object
+      description: volume path
+      required:
+        - name
+        - lv
+        - vg
+      properties:
+        name:
+          type: string
+          description: volume path name
+          example: VPWODC008192
+        lv:
+          type: object
+          required:
+            - name
+          properties:
+            name:
+              type: string
+              description: logic volume name 
+              example: LVDC008192
+        vg:
+          type: object
+          required:
+            - name
+          properties:
+            name:
+              type: string
+              description: volume group name 
+              example: VGDC008192
+            
+    volumepath:
+      type: object
+      description: volume path
+      required:
+        - name
+        - size_MB
+        - fs_type
+        - mount_dir
+        - lv
+        - vg
+      properties:
+        name:
+          type: string
+          description: volume path name
+          example: VPWODC008192
+        size_MB:
+          type: integer
+          format: int64
+          example: 102400
+        fs_type:
+          type: string
+          default: xfs
+          enum:
+            - xfs
+            - ext4
+            - btrfs
+        mount_dir:
+          type: string
+          example: /VP001
+        lv:
+          type: object
+          required:
+            - name
+          properties:
+            name:
+              type: string
+              description: logic volume name 
+              example: LVDC008192
+        vg:
+          type: object
+          required:
+            - name
+            - type
+            - vendor
+            - initiator_type
+            - LUN_ID
+          properties:
+            name:
+              type: string
+              description: volume group name 
+              example: VGDC008192
+            type:
+              type: string
+              enum:
+                - remote
+                - local
+              example: remote
+            vendor:
+              type: string
+              enum:
+                - HUAWEI
+              example: HUAWEI
+            initiator_type:
+              type: string
+              description: initiator type
+              enum:
+                - FC
+              example: FC
+            LUN_ID:
+              type: array
+              description: |
+                FC HBA port WWN. get form /sys/class/scsi_host/${hostN}/device/fc_host/${hostN}/port_name
+              items:
+                type: string
+                example: 6001438003af1ffc
+
+    expand_volumepath:
+      type: object
+      description: volume path
+      required:
+        - name
+        - size_MB
+        - fs_type
+        - mount_dir
+        - lv
+        - vg
+      properties:
+        name:
+          type: string
+          description: volume path name
+          example: VPWODC008192
+        size_MB:
+          type: integer
+          format: int64
+          example: 102400
+        fs_type:
+          type: string
+          default: xfs
+          enum:
+            - xfs
+            - ext4
+            - btrfs
+        mount_dir:
+          type: string
+          example: /VP001
+        lv:
+          type: object
+          required:
+            - name
+          properties:
+            name:
+              type: string
+              description: logic volume name 
+              example: LVDC008192
+        vg:
+          type: object
+          required:
+            - name
+            - type
+            - vendor
+            - initiator_type
+            - add_LUN_ID
+          properties:
+            name:
+              type: string
+              description: volume group name 
+              example: VGDC008192
+            type:
+              type: string
+              enum:
+                - remote
+                - local
+              example: remote
+            vendor:
+              type: string
+              enum:
+                - HUAWEI
+              example: HUAWEI
+            initiator_type:
+              type: string
+              description: initiator type
+              enum:
+                - FC
+              example: FC
+            add_LUN_ID:
+              type: array
+              description: |
+                FC HBA port WWN. get form /sys/class/scsi_host/${hostN}/device/fc_host/${hostN}/port_name
+              items:
+                type: string
+                example: 6001438003af1ffc
+

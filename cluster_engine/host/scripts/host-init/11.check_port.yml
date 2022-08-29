@@ -1,0 +1,5 @@
+- name: node check port
+  hosts: all
+  tasks:
+    - name: check port test
+      debug: msg="check port"

@@ -1,0 +1,138 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": {
+  "NFS": {
+    "type": "object",
+    "properties": {
+      "enabled": {
+        "type": "boolean"
+      },
+      "name": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 32
+      },
+      "site_id": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 64
+      },
+      "type": {
+        "type": "string",
+        "enum":[
+          "NFS",
+          "nfs"
+        ]
+      },
+      "created_user": {
+        "type": "string"
+      },
+      "config": {
+        "type": "object",
+        "properties": {
+          "nfs_ip": {
+            "type": "string",
+            "anyOf": [
+              { "format": "ipv4" },
+              { "format": "ipv6" }
+            ]
+          },
+          "nfs_opts": {
+            "type": "string"
+          },
+          "nfs_source": {
+            "type": "string",
+            "minLength": 2
+          }
+        },
+        "required": [
+          "nfs_ip",
+          "nfs_opts",
+          "nfs_source"
+        ]
+      }
+    },
+    "required": [
+      "enabled",
+      "name",
+      "site_id",
+      "type",
+      "config",
+      "created_user"
+    ]
+  },
+  "S3": {
+    "type": "object",
+    "properties": {
+      "enabled": {
+        "type": "boolean"
+      },
+      "name": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 32
+      },
+      "site_id": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 64
+      },
+      "type": {
+        "type": "string",
+        "enum":[
+          "S3",
+          "s3"
+        ]
+      },
+      "created_user": {
+        "type": "string"
+      },
+      "config": {
+        "type": "object",
+        "properties": {
+          "s3_url": {
+            "type": "string",
+            "minLength": 6
+          },
+          "s3_bucket": {
+            "type": "string",
+            "minLength": 3
+          },
+          "s3_access_key": {
+            "type": "string",
+            "minLength": 3
+          },
+          "s3_secret_key": {
+            "type": "string",
+            "minLength": 8
+          }
+        },
+        "required": [
+          "s3_url",
+          "s3_bucket",
+          "s3_access_key",
+          "s3_secret_key"
+        ]
+      }
+    },
+    "required": [
+      "enabled",
+      "name",
+      "site_id",
+      "type",
+      "config",
+      "created_user"
+    ]
+    }
+  },
+  "type": "object",
+  "oneOf": [
+    {
+      "$ref":"#/definitions/NFS"
+    },
+    {
+      "$ref":"#/definitions/S3"
+    }
+  ]
+
+}

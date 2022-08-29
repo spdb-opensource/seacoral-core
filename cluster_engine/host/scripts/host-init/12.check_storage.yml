@@ -1,0 +1,21 @@
+- name: node check storage
+  hosts: all
+  tasks:
+    - name: check block device
+      stat:
+        path: "{{ item.dev_list }}"
+      with_items: "{{ vgs }}"
+      register: result
+    - fail:
+        msg: "Whoops! block device not found"
+      when: not {{ item.stat.exists }}
+      with_items: "{{ result.results }}"
+    - name: check vg
+      shell: vgdisplay {{ item.vg_name }}
+      with_items: "{{ vgs }}"
+      register: vg_result
+      changed_when: false
+    - fail:
+        msg: "block device has been intialize vg"
+      when: not {{ item.rc }}
+      with_items: "{{ vg_result.results }}"

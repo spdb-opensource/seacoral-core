@@ -1,0 +1,30 @@
+{
+  "auth_info": {
+    "vendor": "HUAWEI-OceanStorV3",
+    "ip": "122.17.77.76",
+    "port": 8088,
+    "username": "admin",
+    "password": "Huawei12#$",
+    "vstorename": "kyzlxm"
+  },
+  "data": {
+    "name": "TestHostGroup11",
+    "hosts": [
+      {
+        "name": "TestHost11",
+        "ip": "10.0.0.100",
+        "os_type": "Linux",
+        "initiator": {
+          "type": "FC",
+          "id": [
+	    ""
+          ]
+        },
+        "location": "",
+        "description": "",
+        "network_name": "",
+        "model": ""
+      }
+    ]
+  }
+}

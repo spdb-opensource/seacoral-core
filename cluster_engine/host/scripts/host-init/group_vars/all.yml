@@ -1,0 +1,9 @@
+ansible_user: "{{  ssh_user }}"
+ansible_password: "{{ ssh_password }}"
+ansible_sudo_password: "{{ ssh_password }}"
+ansible_port: "{{ ssh_port }}"
+packages_dir: "{{ playbook_dir }}/packages"
+fio_dir: /opt/fio
+ca_home_dir: /opt/cluster_agent
+ca_bin_dir: "{{ ca_home_dir }}/bin"
+ca_script_dir: "{{ ca_home_dir }}/script"

@@ -1,0 +1,12 @@
+stages:
+  - build
+
+compile:
+  stage: build
+  script:
+    - cd cluster_manager/apiserver/api && packr2 clean && packr2
+    - sed -i 's!^import.*api/packrd"$!import _ "github.com/upmio/dbscale-kube/cluster_manager/apiserver/api/packrd"!g' api-packr.go
+    - cd ../../../cluster_manager/apiserver/ && env GOPROXY=goproxy.cn go build
+    - cd ../../cluster_engine/controller-manager && env GOPROXY=goproxy.cn go build
+    - cd ../../cluster_engine/agent-manager && env GOPROXY=goproxy.cn go build
+    - cd ../../cluster_engine/network/plugin && env GOPROXY=goproxy.cn go build

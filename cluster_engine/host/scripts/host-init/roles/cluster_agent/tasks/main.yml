@@ -1,0 +1,135 @@
+- name: 检查 kube node status 是否正常
+  shell: /opt/kubectl get node -o wide --kubeconfig=/etc/kubernetes/cluster_engine.conf | grep {{ inventory_hostname }} | awk '{print $2}'
+  delegate_to: localhost
+  register: node_status
+  until: node_status.stdout == "Ready" or node_status.stdout == "Ready,SchedulingDisabled"
+  retries: 8
+  delay: 8
+
+- name: 清除 /root/.phys_cbond_num
+  file: path="/root/.phys_cbond_num" state=absent
+
+- name: 获取本地时间
+  shell: date +%s
+  register: local_timestamp
+  delegate_to: localhost
+  run_once: true
+
+- name: 获取主机时间
+  shell: date +%s
+  register: host_timestamp
+
+- name: 获取时间差
+  shell: echo "{{ (local_timestamp.stdout|int - host_timestamp.stdout|int)|abs}}"
+  register: time_diff
+
+- name: 如果时间不同步 报错退出
+  fail: msg="time isn't synched"
+  when: time_diff|int > 2
+
+- name: 临时关闭 selinux
+  selinux:
+    state: disabled
+
+- name: 永久关闭 selinux
+  lineinfile:
+    dest: /etc/selinux/config
+    regexp: "^SELINUX="
+    line: "SELINUX=disabled"
+
+- name: 关闭 firewalld
+  service: name=firewalld state=stopped enabled=no
+
+#- name: 安装基础软件包
+#  yum: name={{ item }} state=present
+#  with_items:
+#    - bash-completion
+
+- name: 添加定时清理内存 crontab 策略
+  cron:
+    name: clean memory cache
+    weekday: "*"
+    minute: "*/15"
+    hour: "*"
+    user: root
+    job: "{{ ca_script_dir }}/cache drop"
+
+- name: 清除残留介质
+  file: name=/tmp/jq state=absent
+
+- name: 传输jq安装介质
+  copy: src={{ packages_dir }}/x86_64/rpm/jq/ dest=/tmp/jq/ mode=0755
+
+- name: 安装jq
+  shell: yum -y --nogpgcheck localinstall /tmp/jq/*
+
+- name: 准备 cluster_agent 目录
+  file: path={{ item }} state=directory mode=0755
+  with_items:
+  - "{{ ca_bin_dir }}"
+  - "{{ ca_script_dir }}"
+
+- name: 分发 cluster_agent 二进制文件
+  copy: src={{ packages_dir }}/x86_64/bin/cluster_agent dest={{ ca_bin_dir }}/cluster_agent mode=0755
+
+- name: 确保VPMGR目录不存在
+  file: path={{ ca_script_dir }}/VPMGR state=absent
+
+- name: 分发VPMGR脚本
+  unarchive: src={{ packages_dir }}/x86_64/script/VPMGR.tar dest={{ ca_script_dir }}/ mode=0755
+
+- name: 确保hostMGR目录不存在
+  file: path={{ ca_script_dir }}/hostMGR state=absent
+
+- name: 分发hostMGR脚本
+  unarchive: src={{ packages_dir }}/x86_64/script/hostMGR.tar dest={{ ca_script_dir }}/ mode=0755
+
+- name: 创建 cluster_agent 的systemd unit文件
+  template: src=cluster_agent.service.j2 dest=/etc/systemd/system/cluster_agent.service
+
+- name: 拷贝 kubeconfig 文件
+  copy: src=/etc/kubernetes/cluster_agent.conf dest=/etc/kubernetes/cluster_agent.conf
+
+- name: 开机启用 cluster_agent 服务
+  systemd: name=cluster_agent.service state=restarted enabled=yes daemon_reload=yes
+
+- block:
+  - name: 分发 netdev-plugin 二进制文件
+    copy: src={{ packages_dir }}/x86_64/bin/netdev-plugin dest=/opt/cni/bin/ mode=0755
+
+  - name: 确保 netdevMGR 目录不存在
+    file: path={{ ca_script_dir }}/netdevMGR state=absent
+
+  - name: 创建 netdevMGR 目录
+    file: path={{ ca_script_dir }}/netdevMGR state=directory
+
+  - name: 分发 sriov netdevMGR 脚本文件
+    unarchive: src={{ packages_dir }}/x86_64/script/sriov.tar dest={{ ca_script_dir }}/netdevMGR mode=0755
+    when: network_mode == "sriov"
+
+  - name: 分发 macvlan netdevMGR 脚本文件
+    unarchive: src={{ packages_dir }}/x86_64/script/macvlan.tar dest={{ ca_script_dir }}/netdevMGR mode=0755
+    when: network_mode == "macvlan"
+
+  - name: 检查原本的 cni 配置目录是否存在
+    stat:
+      path: /etc/cni/net.d.origin
+    register: origin
+
+  - name: 备份原本的 cni 配置目录
+    shell: mv /etc/cni/net.d /etc/cni/net.d.origin
+    when: not origin.stat.exists
+
+  - name: 保证 cni 目录不存在
+    file: path=/etc/cni/net.d/ state=absent
+
+  - name: 创建 cni 目录
+    file: path=/etc/cni/net.d/ state=directory
+
+  - name: 部署sriov-plugin配置文件
+    template: src=netdev-plugin.conf.j2 dest=/etc/cni/net.d/netdev-plugin.conf
+  when: network_mode == "sriov" or network_mode == "macvlan"
+
+- name: 创建 VG
+  lvg:  vg={{ item.vg_name }} pvs={{ item.dev_list }} state=present force=yes
+  with_items: "{{ vgs }}"

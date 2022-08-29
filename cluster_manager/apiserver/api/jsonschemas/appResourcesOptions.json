@@ -1,0 +1,104 @@
+{
+  "$schema":"http://json-schema.org/draft-07/schema#",
+  "definitions":{
+    "resDef":{
+      "type":"object",
+      "properties":{
+        "services": {
+          "type": "object",
+          "properties": {
+            "units": {
+              "type": "object",
+              "properties": {
+                "resources": {
+                  "type": "object",
+                  "properties": {
+                    "requests": {
+                      "type": "object",
+                      "properties": {
+                        "cpu": {
+                          "type": "integer",
+                          "minimum": 500,
+                          "multipleOf": 100
+                        },
+                        "memory": {
+                          "type": "integer",
+                          "minimum": 256,
+                          "multipleOf": 128
+                        },
+                        "storage": {
+                          "type": "object",
+                          "properties": {
+                            "volumes": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "capacity": {
+                                    "type": "integer",
+                                    "minimum": 1024,
+                                    "multipleOf": 1024
+                                  },
+                                  "type": {
+                                    "type": "string",
+                                    "enum": [
+                                      "data",
+                                      "log"
+                                    ]
+                                  }
+                                },
+                                "required": [
+                                  "capacity",
+                                  "type"
+                                ]
+                              },
+                              "minItems": 1,
+                              "maxItems": 2,
+                              "uniqueItems": true
+                            }
+                          },
+                          "required": [
+                            "volumes"
+                          ]
+                        }
+                      }
+                    }
+                  },
+                  "required": [
+                    "requests"
+                  ]
+                }
+              },
+              "required":[
+                "resources"
+              ]
+            }
+          },
+          "required":[
+            "units"
+          ]
+        }
+      }
+    }
+  },
+  "type":"object",
+  "properties":{
+    "spec":{
+      "type":"object",
+      "properties":{
+        "proxy":{
+          "$ref":"#/definitions/resDef"
+        },
+        "cmha":{
+          "$ref":"#/definitions/resDef"
+        },
+        "database":{
+          "$ref":"#/definitions/resDef"
+        }
+      }
+    }
+  },
+  "required":[
+    "spec"
+  ]
+}

@@ -1,0 +1,9 @@
+- hosts: all
+  tags: upgrade_CE
+  tasks:
+    - name: 停止 CE-controller-agent.service
+      service: name=CE-controller-agent.service state=stopped
+
+- hosts: all
+  roles:
+    - ce-controller-agent

@@ -1,0 +1,20 @@
+1. delete following files:
+    dashboard_backend/dashboard.go
+    dashboard_backend/handler/localehandler.go
+    dashboard_backend/handler/localehandler_test.go
+
+because the localhandler use glog will crash due to https://stackoverflow.com/questions/37284423/glog-flag-redefined-error
+
+2. update following files:
+    dashboard_backend/args/holder.go
+    func GetNamespace(), just return "kube-system"
+
+3. in dashboard_backend/handler/filter.go
+add a cros filter in InstallFilters
+
+func enableCORS(req *restful.Request, resp *restful.Response, chain *restful.FilterChain) {
+	if origin := req.Request.Header.Get("Origin"); origin != "" {
+		resp.AddHeader("Access-Control-Allow-Origin", origin)
+	}
+	chain.ProcessFilter(req, resp)
+}

@@ -1,0 +1,19 @@
+{
+  "name": "",
+  "fs_type": "xfs",
+  "size_MB": "",
+  "mount_dir": "/mnt/test1",
+  "lv": {
+    "name": "lvdata1"
+  },
+  "vg": {
+    "name": "vgdata1",
+    "type": "remote",
+    "vendor": "HUAWEI-FusionStorV10",
+    "initiator_type": "FC",
+    "LUN_ID": [
+      "688860300000001fe036974435089385",
+      "6888603000000020e036974435089385"
+    ]
+  }
+}

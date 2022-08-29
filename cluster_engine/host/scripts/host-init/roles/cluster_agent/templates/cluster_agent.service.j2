@@ -1,0 +1,14 @@
+[Unit]
+Description=CE-controller-agent
+After=network.target
+
+[Service]
+User=root
+Group=root
+ExecStart={{ ca_bin_dir }}/cluster_agent -hostname={{ ansible_hostname }} -v=4 -kubeconfig=/etc/kubernetes/cluster_agent.conf -shelldir={{ ca_script_dir }}
+Restart=always
+RestartSec=10
+LimitNOFILE=65536
+
+[Install]
+WantedBy=multi-user.target

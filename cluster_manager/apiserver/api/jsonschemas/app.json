@@ -1,0 +1,501 @@
+{
+  "$schema":"http://json-schema.org/draft-07/schema#",
+  "definitions":{
+    "conditionDef": {
+      "type": "object",
+      "properties": {
+        "network_mode": {
+          "type":"string",
+          "enum":[
+            "calico",
+            "native"
+          ],
+          "default": "native"
+        },
+        "node_role": {
+          "type":"string",
+          "enum":[
+            "dbscale-node",
+            "dbscale-spare"
+          ],
+          "default": "dbscale-node"
+        },
+        "host": {
+          "type": "object",
+          "properties": {
+            "high_availability": {
+              "type": "boolean"
+            },
+            "candidates_id": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "required": [
+            "high_availability"
+          ]
+        },
+        "network": {
+          "type": "object",
+          "properties": {
+            "high_availability": {
+              "type": "boolean"
+            },
+            "candidates_id": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "required": [
+            "high_availability"
+          ]
+        },
+        "storage_remote": {
+          "type": "object",
+          "properties": {
+            "high_availability": {
+              "type": "boolean"
+            },
+            "candidates_id": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "required": [
+            "high_availability"
+          ]
+        }
+      }
+    },
+    "unitDefMySQL":{
+      "type":"object",
+      "properties":{
+        "resources":{
+          "type":"object",
+          "properties":{
+            "requests":{
+              "type":"object",
+              "properties":{
+                "cpu":{
+                  "type":"integer",
+                  "minimum":500,
+                  "multipleOf":100
+                },
+                "memory":{
+                  "type":"integer",
+                  "minimum":256,
+                  "multipleOf":128
+                },
+                "storage":{
+                  "type":"object",
+                  "properties":{
+                    "performance":{
+                      "type":"string",
+                      "enum":[
+                        "high",
+                        "medium"
+                      ]
+                    },
+                    "type":{
+                      "type":"string",
+                      "enum":[
+                        "host",
+                        "remote"
+                      ]
+                    },
+                    "volumes":{
+                      "type":"array",
+                      "items":{
+                        "type":"object",
+                        "properties":{
+                          "capacity":{
+                            "type":"integer",
+                            "minimum":8192,
+                            "multipleOf":1024
+                          },
+                          "type":{
+                            "type":"string",
+                            "enum":[
+                              "data",
+                              "log"
+                            ]
+                          }
+                        },
+                        "required":[
+                          "capacity",
+                          "type"
+                        ]
+                      },
+                      "minItems":2,
+                      "maxItems":2,
+                      "uniqueItems":true
+                    }
+                  },
+                  "required":[
+                    "performance",
+                    "type",
+                    "volumes"
+                  ]
+                }
+              },
+              "required":[
+                "cpu",
+                "memory",
+                "storage"
+              ]
+            }
+          },
+          "required":[
+            "requests"
+          ]
+        }
+      },
+      "required":[
+        "resources"
+      ]
+    },
+    "unitDefOther":{
+      "type":"object",
+      "properties":{
+        "resources":{
+          "type":"object",
+          "properties":{
+            "requests":{
+              "type":"object",
+              "properties":{
+                "cpu":{
+                  "type":"integer",
+                  "minimum":500,
+                  "multipleOf":100
+                },
+                "memory":{
+                  "type":"integer",
+                  "minimum":128,
+                  "multipleOf":128
+                },
+                "storage":{
+                  "type":"object",
+                  "properties":{
+                    "performance":{
+                      "type":"string",
+                      "enum":[
+                        "high",
+                        "medium"
+                      ]
+                    },
+                    "type":{
+                      "type":"string",
+                      "enum":[
+                        "host",
+                        "remote"
+                      ]
+                    },
+                    "volumes":{
+                      "type":"array",
+                      "items":{
+                        "type":"object",
+                        "properties":{
+                          "capacity":{
+                            "type":"integer",
+                            "minimum":1024,
+                            "multipleOf":1024
+                          },
+                          "type":{
+                            "type":"string",
+                            "enum":[
+                              "data",
+                              "log"
+                            ]
+                          }
+                        },
+                        "required":[
+                          "capacity",
+                          "type"
+                        ]
+                      },
+                      "minItems":2,
+                      "maxItems":2,
+                      "uniqueItems":true
+                    }
+                  },
+                  "required":[
+                    "performance",
+                    "type",
+                    "volumes"
+                  ]
+                }
+              },
+              "required":[
+                "cpu",
+                "memory",
+                "storage"
+              ]
+            }
+          },
+          "required":[
+            "requests"
+          ]
+        }
+      },
+      "required":[
+        "resources"
+      ]
+    },
+    "serviceDef":{
+      "type":"object",
+      "properties":{
+        "image":{
+          "type":"object",
+          "properties":{
+            "id":{
+              "type":"string"
+            }
+          },
+          "required":[
+            "id"
+          ]
+        },
+        "services":{
+          "type":"object",
+          "properties":{
+            "arch":{
+              "type":"object",
+              "properties":{
+                "mode":{
+                  "type":"string"
+                },
+                "replicas":{
+                  "type":"integer"
+                }
+              },
+              "required":[
+                "mode",
+                "replicas"
+              ]
+            },
+            "conditions": {
+              "$ref":"#/definitions/conditionDef"
+            },
+            "ports":{
+              "type":"array",
+              "items":[
+                {
+                  "type":"object",
+                  "properties":{
+                    "name":{
+                      "type":"string",
+                      "enum":[
+                        "server"
+                      ]
+                    },
+                    "port":{
+                      "type":"integer",
+                      "minimum":1025,
+                      "maximum":65535
+                    }
+                  },
+                  "required":[
+                    "name",
+                    "port"
+                  ]
+                }
+              ],
+              "minItems":1,
+              "maxItems":1
+            }
+          },
+          "required":[
+            "arch",
+            "conditions",
+            "ports"
+          ]
+        }
+      },
+      "required":[
+        "image",
+        "services"
+      ]
+    }
+  },
+  "type":"object",
+  "properties":{
+    "created_user":{
+      "type":"string",
+      "minLength":1,
+      "maxLength":64
+    },
+    "desc":{
+      "type":"string",
+      "maxLength":512
+    },
+    "arch":{
+      "type":"string",
+      "enum":[
+        "arm64",
+        "amd64"
+      ]
+    },
+    "name":{
+      "type":"string",
+      "minLength":3,
+      "maxLength":12,
+      "pattern": "^[a-z][a-z0-9]+$"
+    },
+    "spec":{
+      "type":"object",
+      "properties":{
+        "proxy":{
+          "allOf":[
+            {
+              "$ref":"#/definitions/serviceDef"
+            },
+            {
+              "properties":{
+                "services":{
+                  "type":"object",
+                  "properties":{
+                    "arch":{
+                      "type":"object",
+                      "properties":{
+                        "mode":{
+                          "type":"string",
+                          "enum":[
+                            "single",
+                            "clone"
+                          ]
+                        }
+                      }
+                    },
+                    "units":{
+                      "$ref":"#/definitions/unitDefOther"
+                    }
+                  },
+                  "required":[
+                    "arch",
+                    "units"
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        "cmha":{
+          "allOf":[
+            {
+              "$ref":"#/definitions/serviceDef"
+            },
+            {
+              "properties":{
+                "services":{
+                  "type":"object",
+                  "properties":{
+                    "arch":{
+                      "type":"object",
+                      "properties":{
+                        "mode":{
+                          "type":"string",
+                          "enum":[
+                            "single",
+                            "clone"
+                          ]
+                        }
+                      }
+                    },
+                    "units":{
+                      "$ref":"#/definitions/unitDefOther"
+                    }
+                  },
+                  "required":[
+                    "arch",
+                    "units"
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        "database":{
+          "allOf":[
+            {
+              "$ref":"#/definitions/serviceDef"
+            },
+            {
+              "properties":{
+                "services":{
+                  "type":"object",
+                  "properties":{
+                    "arch":{
+                      "type":"object",
+                      "properties":{
+                        "mode":{
+                          "type":"string",
+                          "enum":[
+                            "single",
+                            "replication_async",
+                            "replication_semi_sync"
+                          ]
+                        }
+                      }
+                    },
+                    "num":{
+                      "type":"integer",
+                      "minimum":1
+                    },
+                    "options": {
+                      "type": "object",
+                      "properties": {
+                        "mysqld::character_set_server": {
+                          "type": "string",
+                          "minLength": 1
+                        }
+                      },
+                      "required": [
+                        "mysqld::character_set_server"
+                      ]
+                    },
+                    "units":{
+                      "$ref":"#/definitions/unitDefMySQL"
+                    }
+                  },
+                  "required":[
+                    "arch",
+                    "num",
+                    "options",
+                    "units"
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      },
+      "required":[
+        "database"
+      ],
+      "dependencies":{
+        "cmha":[
+          "proxy"
+        ],
+        "proxy":[
+          "cmha"
+        ]
+      }
+    }
+  },
+  "required":[
+    "created_user",
+    "desc",
+    "arch",
+    "name",
+    "spec"
+  ]
+}

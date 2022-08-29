@@ -1,0 +1,10 @@
+- name: node check network
+  hosts: all
+  tasks:
+    - name: 检查目标主机 cbond 数量
+      shell: ls -d /sys/class/net/cbond* 2>/dev/null | wc -l
+      register: cbond_num
+    #- name: 校验 max_unit 是否和主机 cbond 数量匹配
+    #  fail:
+    #    msg: 'max_unit 数量大于主机 cbond 数量! {{ max_unit }} > {{ cbond_num.stdout }}'
+    #  when: cbond_num.stdout|int < max_unit|int

@@ -1,0 +1,554 @@
+#!/usr/bin/env bash
+
+# This program is part of DBScale.
+
+set -o nounset
+# ##############################################################################
+# Globals, settings
+# ##############################################################################
+POSIXLY_CORRECT=1
+export POSIXLY_CORRECT
+LANG=C
+
+VERSION="1.0.1"
+FILE_NAME="hostMGR"
+
+# ##############################################################################
+# common function package
+# ##############################################################################
+die () {
+    local status="${1}"
+    shift
+    local function_name="${1}"
+    shift
+    error "${function_name}" "$*"
+    exit "$status"
+}
+
+error () {
+    local function_name="${1}"
+    shift
+    echo "ERR[${function_name}]: $* ;"
+}
+
+installed () {
+    command -v "$1" >/dev/null 2>&1
+}
+
+check_value_is_exist () {
+    local key="${1}"
+    local input="${2}"
+    local output
+
+    output="$(jq --raw-output -c "${key}" 2> /dev/null <<< "${input}")"
+
+    if [[ "${output}" == "null" ]];then
+        return 2
+    fi
+}
+
+add_field () {
+    local func_name="${FILE_NAME}.add_field"
+
+    local value_type="${1}"
+    local key="${2}"
+    local value="${3}"
+    local input="${4}"
+
+    case "${value_type}" in
+        "json_string")
+            jq  ". +{\"${key}\": ${value}}" <<< "${input}" 2> /dev/null
+            ;;
+        "string")
+            jq  ". +{\"${key}\": \"${value}\"}" <<< "${input}" 2> /dev/null
+            ;;
+        "int64")
+            jq  ". +{\"${key}\": ${value}}" <<< "${input}" 2> /dev/null
+            ;;
+        "float64")
+            # check int,if value is int , convert type to float64
+            [[ "${value}" =~ ^[0-9]*$ ]] && value="${value}.0"
+
+            jq  ". +{\"${key}\": ${value}}" <<< "${input}" 2> /dev/null
+            ;;
+        *)
+            error "${func_name}" "value_type nonsupport"
+            return 2
+            ;;
+    esac
+}
+
+get_value_not_null () {
+    local func_name="${FILE_NAME}.get_value_not_null"
+
+    local key="${1}"
+    local input="${2}"
+
+    local output
+
+    check_value_is_exist "${key}" "${input}" || {
+        error "${func_name}" "check value is not exist"
+        return 2
+    }
+
+    output="$( jq --raw-output -c "${key}" <<< "${input}" )"
+
+    [[ -z "${output}" ]] && {
+        error "${func_name}" "the length of value is zero"
+        return 2
+    }
+
+    [[ "${output}" == "null" ]] && {
+        error "${func_name}" "value equal to \"null\""
+        return 2
+    }
+
+    echo "${output}"
+}
+
+get_interface_type(){
+    local func_name="${FILE_NAME}.get_interface_type"
+
+    local nic_dir="/sys/class/net"
+    local device="${1}"
+    local if_type=''
+    # determine type of first argument (bridge, physical interface...),
+    if [[ -d "${nic_dir}/${device}" ]]; then
+        if [[ -d "${nic_dir}/${device}/bridge" ]]; then
+            error "${func_name}" "unsupported for Linux bridge."
+            return 2
+        elif installed ovs-vsctl && ovs-vsctl list-br|grep -q "^${device}$"; then
+            error "${func_name}" "unsupported for ovs."
+            return 2
+        elif [[ "$(cat "${nic_dir}/${device}/type")" -eq 32 ]]; then # Infiniband IPoIB interface type 32
+            error "${func_name}" "unsupported for IPoIB."
+            return 2
+        elif [[ -d "${nic_dir}/${device}/bonding" ]]; then
+            if_type="bond"
+        elif [[ -d "${nic_dir}/${device}/device/physfn" ]]; then
+            output="phys-sriov"
+        else
+            if_type="phys"
+        fi
+    else
+        error "${func_name}" "I do not know how to setup interface ${device}."
+        return 2
+    fi
+    echo "${if_type}"
+}
+
+# ##############################################################################
+# vg manager action function
+# action function can use function( die ) and exit
+# ##############################################################################
+vg_get () {
+    local func_name="${FILE_NAME}.vg_get"
+    unset POSIXLY_CORRECT
+
+    # output vg size unit
+    local unit=B
+
+    local input="${1}"
+    local output="[]"
+
+    local i=0
+    while true; do
+        local vg_output="{}"
+
+        if check_value_is_exist ".vg_name[${i}]" "${input}" &> /dev/null; then
+            local vg_name
+            vg_name="$( get_value_not_null ".vg_name[${i}]" "${input}" )" || {
+                (( i++ ))
+                continue
+            }
+
+            if ! vgdisplay "${vg_name}" &> /dev/null; then
+                (( i++ ))
+                continue
+            fi
+
+            vg_output="$( add_field "string" "vg_name" "${vg_name}" "${vg_output}" )" || {
+                die 40 "${func_name}" "append vg_output failed: ${vg_output}"
+            }
+
+            local vg_size
+            vg_size="$( vgdisplay "${vg_name}" --noheadings --unit "${unit}" -C -o "vg_size" | sed 's/'${unit}'//;s/ //' 2> /dev/null )" || {
+                output="$( jq --argjson append_string "${vg_output}" ". += [\$append_string]" <<< "${output}" )"
+                (( i++ ))
+                continue
+            }
+
+            local vg_free
+            vg_free="$( vgdisplay "${vg_name}" --noheadings --unit "${unit}" -C -o "vg_free" | sed 's/'${unit}'//;s/ //' 2> /dev/null )" || {
+                output="$( jq --argjson append_string "${vg_output}" ". += [\$append_string]" <<< "${output}" )"
+                (( i++ ))
+                continue
+            }
+
+            vg_output="$( add_field "int64" "vg_size" "${vg_size}" "${vg_output}" )" || {
+                die 41 "${func_name}" "append vg_output failed: ${vg_output}"
+            }
+
+            vg_output="$( add_field "int64" "vg_free" "${vg_free}" "${vg_output}" )" || {
+                die 42 "${func_name}" "append vg_output failed: ${vg_output}"
+            }
+
+            output="$( jq --argjson append_string "${vg_output}" ". += [\$append_string]" <<< "${output}" )" || {
+                die 43 "${func_name}" "json append string failed!"
+            }
+
+            ((i++))
+        else
+            break
+        fi
+    done
+
+    jq . <<< "${output}"
+}
+
+# ##############################################################################
+# initiator manager action function
+# action function can use function( die ) and exit
+# ##############################################################################
+initiator_list () {
+    local func_name="${FILE_NAME}.initiator_list"
+
+    local input="${1}"
+    local output='{"ids":[]}'
+    local type
+    type="$( get_value_not_null ".type" "${input}" )" || {
+        die 40 "${func_name}" "get type failed!"
+    }
+
+    case "${type}" in
+        "fc")
+            if [[ -d /sys/class/fc_host ]]; then
+                output="$( add_field "string" "type" "${type}" "${output}" )" || {
+                    die 41 "${func_name}" "append type failed: ${output}"
+                }
+
+                cd /sys/class/fc_host/ || exit
+                for host in host*; do
+                    local fc_host_id
+
+                    if [[ $( cat "/sys/class/fc_host/${host}/port_state" ) == "Online" ]]; then
+                        fc_host_id=$( < "/sys/class/fc_host/${host}/port_name" cut -c 3- ) || {
+                            die 41 "${func_name}" "get fc_host_id failed: ${fc_host_id}"
+                        }
+
+                        output="$( jq --arg append_string "${fc_host_id}" ".ids += [\$append_string]" <<< "${output}" )" || {
+                            die 42 "${func_name}" "json append string failed!"
+                        }
+                    fi
+                done
+            fi
+            ;;
+        "iscsi")
+            output="$( add_field "string" "type" "${type}" "${output}" )" || {
+                die 41 "${func_name}" "append type failed: ${output}"
+            }
+            ;;
+        *)
+            die 43 "${func_name}" "initiator type(${type}) nonsupport"
+            ;;
+    esac
+
+    jq . <<< "${output}"
+    return 0
+}
+# ##############################################################################
+# get component status function
+# action function can use function( die ) and exit
+# ##############################################################################
+get_consul_status() {
+    local func_name="${FILE_NAME}.get_consul_status"
+
+    local ip
+    local output
+    local status
+
+    installed jq || {
+        echo "warning"
+        return 11
+    }
+
+    installed curl || {
+        echo "warning"
+        return 11
+    }
+
+    ip="$( jq --raw-output ".bind_addr" /etc/consul.d/consul.json 2> /dev/null )"
+    output="$( curl -s -H "Accept: application/json" -G "http://${ip}:8500/v1/health/node/${ip}" --data-urlencode 'filter=CheckID == serfHealth' 2> /dev/null )"
+    status="$( get_value_not_null ".[0].Status" "${output}" 2>/dev/null )"
+    if [[ "${status}" == "passing" ]]; then
+        echo "passing"
+        return 0
+    else
+        echo "critical"
+        return 10
+    fi
+}
+
+get_docker_status() {
+    local func_name="${FILE_NAME}.get_docker_status"
+
+    installed docker || {
+        echo "warning"
+        return 11
+    }
+
+    if docker info &> /dev/null; then
+        echo "passing"
+        return 0
+    else
+        echo "critical"
+        return 11
+    fi
+}
+
+get_kubelet_status() {
+    local func_name="${FILE_NAME}.get_kubelet_status"
+    KUBECONFIG="${HOME}/.kube/config"
+
+    [[ -x "/opt/kube/bin/kubectl" ]] || {
+        echo "warning"
+        return 12
+    }
+    [[ -f "${KUBECONFIG}" ]] || {
+        echo "warning"
+        return 12
+    }
+
+    local ip
+    ip="$( awk -F': ' '/^address/{print$2}' /var/lib/kubelet/config.yaml 2> /dev/null )"
+    local p
+    p="$( awk -F': ' '/^port/{print$2}' /var/lib/kubelet/config.yaml 2> /dev/null )"
+    local port="${p:-10250}"
+
+    local token
+    token="$( /opt/kube/bin/kubectl -n kube-system get secrets monitoring-secret-token -ojsonpath='{.data.token}' 2> /dev/null | base64 -d )"
+    local status
+    status="$( curl -k "https://${ip}:${port}/healthz" --header "Authorization: Bearer ${token}" 2>/dev/null )"
+
+    if [[ "${status}" == "ok" ]]; then
+        echo "passing"
+        return 0
+    else
+        echo "critical"
+        return 12
+    fi
+}
+
+get_component_status() {
+    local func_name="${FILE_NAME}.get_component_status"
+
+    local consul_status
+    local docker_status
+    local kubelet_status
+    local timestamp
+
+    consul_status="$( get_consul_status )"
+    docker_status="$( get_docker_status )"
+    kubelet_status="$( get_kubelet_status )"
+    timestamp="$( date +%s )"
+
+    jq -c . <<< "{\"timestamp\":\"${timestamp}\",\"status\":{\"consul\":\"${consul_status}\",\"docker\":\"${docker_status}\",\"kubelet\":\"${kubelet_status}\"}}"
+}
+
+get_max_unit_count() {
+    local func_name="${FILE_NAME}.get_max_unit_count"
+    local cbond_num=0
+    local file="/root/.phys_cbond_num"
+    local input="${1}"
+
+    local network_mode
+    network_mode="$( get_value_not_null ".network_mode" "${input}" )" || {
+        die 44 "${func_name}" "get network_mode failed!"
+    }
+
+    case "${network_mode}" in
+        "sriov")
+            local list
+            list="$( ls -d /sys/class/net/cbond* 2>/dev/null )"
+            for net in ${list}; do
+                local device=${net##*/}
+                local type
+                type="$( get_interface_type "${device}" )"
+                if [[ "${type}" == "phys" ]]; then
+                    if [[ -f "${file}" ]]; then
+                        cbond_num="$( cat "${file}" )"
+                    else
+                        cbond_num="$( ls -d /sys/class/net/cbond* 2>/dev/null | wc -l )"
+                        echo "${cbond_num}" > "${file}"
+                    fi
+                    break
+                elif [[ "${type}" == "bond" ]]; then
+                    ((cbond_num++))
+                fi
+            done
+
+            if [[ "${cbond_num}" == 0 ]] && [[ -f "${file}" ]]; then
+                cbond_num="$( cat "${file}" )"
+            fi
+            ;;
+        "macvlan")
+            cbond_num=110
+            ;;
+        "calico")
+            cbond_num=110
+            ;;
+    esac
+
+    jq -c . <<< "{\"max_unit\":${cbond_num}}"
+}
+# ##############################################################################
+# The main() function is called at the action function.
+# ##############################################################################
+main () {
+    local func_name="${FILE_NAME}.main"
+
+    local object="${1}"
+    local action="${2}"
+
+    installed jq || {
+        die 21 "${func_name}" "Not install jq"
+    }
+
+    case "${object}" in
+        "vg")
+            case "${action}" in
+                "get")
+                    installed vgdisplay || {
+                        die 22 "${func_name}" "Not install vgdisplay"
+                    }
+                    local input="${3}"
+                    vg_get "${input}"
+                    ;;
+                *)
+                    die 23 "${func_name}" "vg action(${action}) nonsupport"
+                    ;;
+            esac
+            ;;
+        "initiator")
+            case "${action}" in
+                "list")
+                    local input="${3}"
+                    initiator_list "${input}"
+                    ;;
+                *)
+                    die 24 "${func_name}" "initiator action(${action}) nonsupport"
+                    ;;
+            esac
+            ;;
+        "component")
+            case "${action}" in
+                "status")
+                    get_component_status
+                    ;;
+                "consul")
+                    get_consul_status || exit $?
+                    ;;
+                "docker")
+                    get_docker_status || exit $?
+                    ;;
+                "kubelet")
+                    get_kubelet_status || exit $?
+                    ;;
+                *)
+                    die 25 "${func_name}" "component action(${action}) nonsupport"
+                    ;;
+            esac
+            ;;
+        "max_unit")
+            case "${action}" in
+                "count")
+                    local input="${3}"
+                    get_max_unit_count "${input}" || exit $?
+                    ;;
+                *)
+                    die 26 "${func_name}" "max_unit action(${action}) nonsupport"
+                    ;;
+            esac
+            ;;
+        "cache")
+            case "${action}" in
+                "drop")
+                    sync && echo 3 > /proc/sys/vm/drop_caches
+                    ;;
+                *)
+                    die 26 "${func_name}" "max_unit action(${action}) nonsupport"
+                    ;;
+            esac
+            ;;
+        "version" )
+            echo "${VERSION}"
+            exit 0
+            ;;
+        *)
+            die 27 "${func_name}" "object(${object}) nonsupport"
+            ;;
+    esac
+}
+
+main "${@:-""}"
+
+# ##############################################################################
+# Documentation
+# ##############################################################################
+:<<'DOCUMENTATION'
+================================================================================
+component status
+output json example:
+{
+  "timestamp": 155388323,
+  "state": {
+    "consul_agent": "passing",
+    "docker": "passing",
+    "kubelet": "passing"
+  }
+}
+
+================================================================================
+vg get {{json_string}}
+input json example:
+{
+  "vg_name": ["VG001","VG002"]
+}
+
+output json example:
+[
+  {
+    "vg_name": "VG001",
+    "vg_size": 10240,
+    "vg_free": 5120
+  }
+]
+
+================================================================================
+initiator list
+input json example:
+{
+  "type": "fc"
+}
+
+output json example:
+{
+  "type": "fc",
+  "ids": [
+    "oa123kowemklfe",
+    "sdofkwp2323232"
+  ]
+}
+================================================================================
+max_unit count
+input json example:
+{
+  "network_mode": "sriov"
+}
+
+output json example:
+{
+  "max_unit": 63
+}
+
+DOCUMENTATION

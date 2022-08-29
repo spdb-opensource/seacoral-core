@@ -1,0 +1,12 @@
+{
+  "auth_info": {
+    "vendor": "HUAWEI-FusionStorV10",
+    "ip": "10.134.20.134",
+    "port": 28443,
+    "username": "cmdadmin",
+    "password": "IaaS@PORTAL-CLOUD9!"
+  },
+  "data": {
+    "name": "0"
+  }
+}

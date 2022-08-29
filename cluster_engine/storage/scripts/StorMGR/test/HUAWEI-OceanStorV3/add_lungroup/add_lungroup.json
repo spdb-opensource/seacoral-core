@@ -1,0 +1,22 @@
+{
+  "auth_info": {
+    "vendor": "HUAWEI-OceanStorV3",
+    "ip": "122.17.77.76",
+    "port": 8088,
+    "username": "admin",
+    "password": "Huawei12#$",
+    "vstorename": "kyzlxm"
+  },
+  "data": {
+    "name": "testLunGroup11",
+    "alloc_type": "thick",
+    "luns": [
+      {
+        "name": "testLun11",
+        "capacity_MB": 1024,
+        "storagepool_name": "Iaas_ironic_01",
+        "description": "lun description"
+      }
+    ]
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "name": "",
+  "fs_type": "xfs",
+  "size_MB": "",
+  "mount_dir": "/mnt/test",
+  "lv": {
+    "name": "lvdata"
+  },
+  "vg": {
+    "name": "vgdata",
+    "type": "remote",
+    "vendor": "HUAWEI-OceanStorV3",
+    "initiator_type": "FC",
+    "LUN_ID": [
+      "39",
+      "40",
+      "41"
+    ]
+  }
+}

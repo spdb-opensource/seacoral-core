@@ -1,0 +1,67 @@
+#!/bin/bash
+
+set -o nounset
+
+OPTION="${1}"
+METHOD="${2}"
+INPUT="${3}"
+
+DIR="$( readlink -f "$0"  )"
+BASE_DIR="$( dirname "${DIR}" )"
+declare -r BASE_DIR
+LIB_BASE_DIR="${BASE_DIR}/lib"
+declare -r LIB_BASE_DIR
+# shellcheck disable=SC1091
+# shellcheck source=../lib/function.sh
+source "${LIB_BASE_DIR}/_function.sh"
+
+VENDOR="$( getValueNotNull ".auth_info.vendor" "${INPUT}" )" || die $? "VENDOR ${VENDOR}"
+SCRIPTS_BASE_DIR="${LIB_BASE_DIR}/${VENDOR}"
+
+case "${OPTION}" in
+    hostgroup)
+        case "${METHOD}" in
+            add)
+                sh "${SCRIPTS_BASE_DIR}/add_hostgroup.sh" "${INPUT}"
+                ;;
+            delete)
+                sh "${SCRIPTS_BASE_DIR}/del_hostgroup.sh" "${INPUT}"
+                ;;
+            list)
+                sh "${SCRIPTS_BASE_DIR}/list_hostgroup.sh" "${INPUT}"
+                ;;
+        esac
+        ;;
+
+    lungroup)
+        case "${METHOD}" in
+            expand)
+                sh "${SCRIPTS_BASE_DIR}/expand_lungroup.sh" "${INPUT}"
+                ;;
+            add)
+                sh "${SCRIPTS_BASE_DIR}/add_lungroup.sh" "${INPUT}"
+                ;;
+            delete)
+                sh "${SCRIPTS_BASE_DIR}/del_lungroup.sh" "${INPUT}"
+                ;;
+            list)
+                sh "${SCRIPTS_BASE_DIR}/list_lungroup.sh" "${INPUT}"
+                ;;
+            add_mapping)
+                sh "${SCRIPTS_BASE_DIR}/add_mapping.sh" "${INPUT}"
+                ;;
+            delete_mapping)
+                sh "${SCRIPTS_BASE_DIR}/del_mapping.sh" "${INPUT}"
+                ;;
+        esac
+        ;;
+
+    storagepool)
+        case "${METHOD}" in
+            list)
+                sh "${SCRIPTS_BASE_DIR}/list_storagepool.sh" "${INPUT}"
+                ;;
+        esac
+        ;;
+
+esac

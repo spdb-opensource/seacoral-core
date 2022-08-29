@@ -1,0 +1,188 @@
+#!/bin/bash
+
+set -o nounset
+# ##############################################################################
+# Globals, settings
+# ##############################################################################
+LANG=C
+
+FILE_NAME="VPMGR"
+LOG_FILE="/var/log/cluster_agent/VPMGR.log"
+BASE_DIR="$( dirname "$( readlink -f "$0"  )" )"
+# ##############################################################################
+# common function package
+# ##############################################################################
+die () {
+    local status="${1}"
+    shift
+    local function_name="${1}"
+    shift
+    error "${function_name}" "$*"
+    exit "$status"
+}
+
+error () {
+    local function_name="${1}"
+    shift
+    local timestamp
+    timestamp="$( date +"%Y-%m-%d %T %N" )"
+
+    echo "[${timestamp}] ERR[${function_name}]: $* ;" | tee -a "${LOG_FILE}"
+}
+
+info () {
+    local function_name="${1}"
+    shift
+    local timestamp
+    timestamp="$( date +"%Y-%m-%d %T %N" )"
+
+    echo "[${timestamp}] INFO[${function_name}]: $* ;" | tee -a "${LOG_FILE}"
+}
+
+installed () {
+    command -v "$1" >/dev/null 2>&1
+}
+
+check_value_is_exist () {
+    local key="${1}"
+    local input="${2}"
+    local output
+
+    output="$( jq --raw-output -c "${key}" 2> /dev/null <<< "${input}" )"
+
+    [[ "${output}" != "null" ]] || return 2
+}
+
+get_value_not_null () {
+    local func_name="${FILE_NAME}.get_value_not_null"
+
+    local key="${1}"
+    local input="${2}"
+
+    local output
+
+    check_value_is_exist "${key}" "${input}" || {
+        error "${func_name}" "check value is not exist"
+        return 2
+    }
+
+    output="$( jq --raw-output -c "${key}" <<< "${input}" 2> /dev/null )"
+
+    [[ -n "${output}" ]] || {
+        error "${func_name}" "the length of value is zero"
+        return 2
+    }
+
+    [[ "${output}" != "null" ]] || {
+        error "${func_name}" "value equal to \"null\""
+        return 2
+    }
+
+    echo "${output}"
+}
+# ##############################################################################
+# The main() function is called at the action function.
+# #############################################################################
+main () {
+    local func_name="${FILE_NAME}.main"
+    local object="${1}"
+    local option="${2}"
+    local input="${3}"
+
+    installed jq || die 200 "${func_name}" "not found jq!"
+
+    if [[ "${object}" != "vp" ]]; then
+        die 201 "${func_name}" "object only support vp"
+    fi
+
+    local vg_type
+    vg_type="$( get_value_not_null ".vg.type" "${input}" )" || {
+        die 202 "${func_name}" "get .vg.type failed!"
+    }
+
+    case "${vg_type}" in
+        "local")
+            "${BASE_DIR}/local.sh" "${option}" "${input}" || die $? "${func_name}" "${vg_type} ${option} failed!"
+            ;;
+        "remote")
+            local vg_vendor
+            vg_vendor="$( get_value_not_null ".vg.vendor" "${input}" )" || {
+                die 203 "${func_name}" "get .vg.vendor failed!"
+            }
+            case "${vg_vendor}" in
+                "HUAWEI-OceanStorV3")
+                    "${BASE_DIR}/remote.sh" "${option}" "${input}"
+                    ;;
+            esac
+    esac
+}
+
+main "${@:-""}"
+
+# ##############################################################################
+# Documentation
+# ##############################################################################
+:<<'DOCUMENTATION'
+================================================================================
+VPMGR vp add {{json_string}}
+input json examle:
+{
+  "fs_type": "xfs",
+  "size_MB": 100,
+  "lv": {
+    "name": "lvdata1"
+  },
+  "vg": {
+    "name": "vgdata1",
+    "type": "local",
+    "vendor": "local",
+    "initiator_type": "",
+    "LUN_ID": [
+      ""
+    ]
+  }
+}
+output json example:
+{
+  "mounter": "",
+  "device": "/dev/mapper/local_medium_VG-mysql002--z56--mysql--0--data"
+}
+================================================================================
+VPMGR vp delete {{json_string}}
+input json examle:
+{
+  "fs_type": "xfs",
+  "size_MB": 100,
+  "lv": {
+    "name": "lvdata1"
+  },
+  "vg": {
+    "name": "vgdata1",
+    "type": "local",
+    "vendor": "local",
+    "initiator_type": "",
+    "LUN_ID": [
+      ""
+    ]
+  }
+}
+================================================================================
+VPMGR vp expand {{json_string}}
+input json examle:
+{
+  "fs_type": "xfs",
+  "size_MB": 200,
+  "lv": {
+    "name": "lvdata1"
+  },
+  "vg": {
+    "name": "vgdata1",
+    "type": "local",
+    "vendor": "local",
+    "initiator_type": "",
+    "LUN_ID": [
+      ""
+    ]
+  }
+}
+DOCUMENTATION

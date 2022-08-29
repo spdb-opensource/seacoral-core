@@ -1,0 +1,187 @@
+#!/usr/bin/env bash
+
+# This program is part of DBScale.
+
+set -o nounset
+# ##############################################################################
+# Globals, settings
+# ##############################################################################
+POSIXLY_CORRECT=1
+export POSIXLY_CORRECT
+LANG=C
+
+VERSION="2.0.0"
+FILE_NAME="imageMGR"
+
+# ###########################################################################
+# common function package
+# ###########################################################################
+die () {
+    local status="${1}"
+    shift
+    local function_name="${1}"
+    shift
+    error "${function_name}" "$*"
+    exit "$status"
+}
+
+error () {
+    local function_name="${1}"
+    shift
+    echo "ERR[${function_name}]: $* ;"
+}
+
+installed () {
+    command -v "$1" >/dev/null 2>&1
+}
+
+check_json_syntax () {
+    local input="${1}"
+
+    jq -e . &> /dev/null <<< "${input}"
+}
+
+check_value_is_exist () {
+    local key="${1}"
+    local input="${2}"
+    local output
+
+    output="$(jq --raw-output -c "${key}" 2> /dev/null <<< "${input}")"
+
+    if [[ "${output}" == "null" ]];then
+        return 2
+    fi
+}
+
+get_value_not_null () {
+    local func_name="_function.get_value_not_null"
+
+    local key="$1"
+    local input="$2"
+
+    local output
+
+    check_value_is_exist "${key}" "${input}" || {
+        error "${func_name}" "check value is not exist"
+        return 4
+    }
+
+    output="$( jq --raw-output -c "${key}" <<< "${input}" )"
+
+    [[ -z "${output}" ]] && {
+        error "${func_name}" "the length of value is zero"
+        return 5
+    }
+
+    [[ "${output}" == "null" ]] && {
+        error "${func_name}" "value equal to \"null\""
+        return 6
+    }
+
+    echo "${output}"
+    return 0
+}
+
+# ##############################################################################
+# image manager action function
+# action function can use function( die ) and exit
+# ##############################################################################
+
+image_pull () {
+    local func_name="${FILE_NAME}.image_pull"
+    local input="${1}"
+
+    local image_registry
+    image_registry="$( get_value_not_null ".image_registry" "${input}" )" || {
+        die 41 "${func_name}" "get image registry failed!"
+    }
+
+    local project_name
+    project_name="$( get_value_not_null ".project_name" "${input}" )" || {
+        die 42 "${func_name}" "get project name failed!"
+    }
+
+    local type
+    type="$( get_value_not_null ".type" "${input}" )" || {
+        die 43 "${func_name}" "get image type failed!"
+    }
+
+    local image_version
+    image_version="$( get_value_not_null ".version" "${input}" )" || {
+        die 44 "${func_name}" "get image version failed!"
+    }
+    local image_arch
+    image_arch="$( get_value_not_null ".arch" "${input}" )" || {
+        die 45 "${func_name}" "get image arch failed!"
+    }
+
+    local output
+    output="$( curl --silent --write-out "HTTPSTATUS:%{http_code}" --insecure --request GET "https://${image_registry}/api/v2.0/projects/${project_name}/repositories/${type}/artifacts/${image_version}-${image_arch}/tags?page=1&page_size=10&with_signature=false&with_immutable_status=false" )"
+
+    local status
+    status="$(echo "${output}" | tr -d '\n' | sed -e 's/.*HTTPSTATUS://')"
+
+    local body
+    body="$(sed -e 's/HTTPSTATUS\:.*//g' <<< "${output}")"
+
+    if [[ -z "${output}" ]] ; then
+        die 46 "${func_name}" "response is null"
+    elif [[ "${status}" -ne "200" ]] ; then
+        err_desc=$(get_value_not_null ".errors[0].message" "${body}")
+        die 47 "${func_name}" "response message: http status code=${status} description=${err_desc}"
+    fi
+}
+
+# ##############################################################################
+# The main() function is called at the end of the script.
+# only main function can use function( die ) and exit
+# ##############################################################################
+main () {
+    local func_name="${FILE_NAME}.main"
+    local object="${1}"
+    local option="${2}"
+
+    case "${object}" in
+        "image")
+            installed jq || {
+                die 21 "${func_name}" "not install jq"
+            }
+            case "${option}" in
+                "pull")
+                    local input="${3}"
+
+                    image_pull "${input}"
+                    ;;
+                *)
+                    die 22 "${func_name}" "image option(${option}) nonsupport"
+                    ;;
+            esac
+            ;;
+        "version" )
+            echo "${VERSION}"
+            exit 0
+            ;;
+        *)
+            die 23 "${func_name}" "object(${object}) nonsupport"
+            ;;
+    esac
+}
+
+main "${@:-""}"
+
+# ##############################################################################
+# Documentation
+# ##############################################################################
+:<<'DOCUMENTATION'
+================================================================================
+image pull {{json_string}}
+input json example:
+{
+  "image_registry": "registry1.harbor.mycluster01.example.com:28083",
+  "project_name": "dbscale",
+  "type":  "mysql",
+  "version": "5.7.24.1",
+  "arch": "amd64"
+}
+
+DOCUMENTATION

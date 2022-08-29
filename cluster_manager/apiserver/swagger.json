@@ -1,0 +1,4600 @@
+{
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "schemes": [
+    "http",
+    "https"
+  ],
+  "swagger": "2.0",
+  "info": {
+    "description": "The purpose of this service is to provide an application\nthat is using plain go code to define an API",
+    "title": "HTTP API.",
+    "contact": {
+      "name": "Hubery",
+      "email": "fuguangrong@bsgchina.com"
+    },
+    "version": "1.0"
+  },
+  "host": "localhost",
+  "basePath": "/v1.0",
+  "paths": {
+    "/manager/apps": {
+      "get": {
+        "description": "List apps\nThis will returns a list of apps",
+        "tags": [
+          "apps"
+        ],
+        "summary": "查询服务",
+        "operationId": "listApps",
+        "responses": {
+          "200": {
+            "$ref": "#/responses/listAppsResponseWrapper"
+          },
+          "500": {
+            "$ref": "#/responses/ErrorResponse"
+          }
+        }
+      },
+      "post": {
+        "description": "Add a new app\nThis will create a new appss",
+        "tags": [
+          "apps"
+        ],
+        "summary": "增加新服务",
+        "operationId": "postApp",
+        "parameters": [
+          {
+            "name": "Body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/AppConfig"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "$ref": "#/responses/TaskObjectResponse"
+          },
+          "400": {
+            "$ref": "#/responses/ErrorResponse"
+          },
+          "500": {
+            "$ref": "#/responses/ErrorResponse"
+          }
+        }
+      }
+    },
+    "/manager/apps/detail": {
+      "get": {
+        "description": "List apps\nThis will returns a list of apps",
+        "tags": [
+          "apps"
+        ],
+        "summary": "查询服务",
+        "operationId": "listAppsDetail",
+        "responses": {
+          "200": {
+            "$ref": "#/responses/listAppsResponseWrapper"
+          },
+          "500": {
+            "$ref": "#/responses/ErrorResponse"
+          }
+        }
+      }
+    },
+    "/manager/apps/{app}/database/schema": {
+      "get": {
+        "description": "List app db schema\nThis will returns a list of app db schema",
+        "tags": [
+          "apps"
+        ],
+        "summary": "查询服务",
+        "operationId": "listAppDBSchema",
+        "parameters": [
+          {
+            "type": "string",
+            "x-go-name": "App",
+            "name": "app",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/listAppDBSchemaResponseWrapper"
+          },
+          "500": {
+            "$ref": "#/responses/ErrorResponse"
+          }
+        }
+      },
+      "post": {
+        "description": "Add a new app database\nThis will create a new apps database",
+        "tags": [
+          "apps"
+        ],
+        "summary": "增加数据库服务",
+        "operationId": "postAppDBSchema",
+        "parameters": [
+          {
+            "type": "string",
+            "x-go-name": "App",
+            "name": "app",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "Body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/AppSchemaConfig"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "$ref": "#/responses/TaskObjectResponse"
+          },
+          "400": {
+            "$ref": "#/responses/ErrorResponse"
+          },
+          "500": {
+            "$ref": "#/responses/ErrorResponse"
+          }
+        }
+      }
+    },
+    "/manager/apps/{app}/database/schema/{schema}": {
+      "get": {
+        "description": "List app db schema detail\nThis will returns a list of app db schema detail",
+        "tags": [
+          "apps"
+        ],
+        "summary": "查询服务",
+        "operationId": "listAppDBSchemaDetail",
+        "parameters": [
+          {
+            "type": "string",
+            "x-go-name": "App",
+            "name": "app",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "string",
+            "x-go-name": "Schema",
+            "name": "schema",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "string",
+            "x-go-name": "ID",
+            "name": "id",
+            "in": "query"
+          },
+          {
+            "type": "string",
+            "x-go-name": "Name",
+            "name": "name",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/listAppDBSchemaDetailResponseWrapper"
+          },
+          "500": {
+            "$ref": "#/responses/ErrorResponse"
+          }
+        }
+      },
+      "delete": {
+        "description": "Delete the app schema\nThis will delete the app db schema",
+        "tags": [
+          "apps"
+        ],
+        "summary": "删除服务",
+        "operationId": "deleteAppDBSchema",
+        "parameters": [
+          {
+            "type": "string",
+            "x-go-name": "App",
+            "description": "对象 ID 或者 Name",
+            "name": "app",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "string",
+            "x-go-name": "Schema",
+            "name": "schema",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": " Deleted"
+          },
+          "500": {
+            "$ref": "#/responses/ErrorResponse"
+          }
+        }
+      }
+    },
+    "/manager/apps/{app}/database/user": {
+      "get": {
+        "description": "List app db user\nThis will returns a list of app db user",
+        "tags": [
+          "apps"
+        ],
+        "summary": "查询数据库用户",
+        "operationId": "listAppDBUser",
+        "parameters": [
+          {
+            "type": "string",
+            "x-go-name": "App",
+            "name": "app",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/listAppDBUserResponseWrapper"
+          },
+          "500": {
+            "$ref": "#/responses/ErrorResponse"
+          }
+        }
+      }
+    },
+    "/manager/apps/{app}/database/user/{user}": {
+      "delete": {
+        "description": "Delete the app db user\nThis will delete the app db user",
+        "tags": [
+          "apps"
+        ],
+        "summary": "删除服务数据库用户",
+        "operationId": "deleteAppDBUser",
+        "parameters": [
+          {
+            "type": "string",
+            "x-go-name": "App",
+            "description": "对象 ID 或者 Name",
+            "name": "app",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "string",
+            "x-go-name": "User",
+            "name": "user",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "string",
+            "x-go-name": "IP",
+            "name": "ip",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": " Deleted"
+          },
+          "500": {
+            "$ref": "#/responses/ErrorResponse"
+          }
+        }
+      }
+    },
+    "/manager/apps/{app}/database/users": {
+      "post": {
+        "description": "Add a new app user\nThis will create a new apps user",
+        "tags": [
+          "apps"
+        ],
+        "summary": "增加服务用户",
+        "operationId": "postAppUser",
+        "parameters": [
+          {
+            "type": "string",
+            "x-go-name": "App",
+            "name": "app",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "Body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/AppUserConfig"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "$ref": "#/responses/TaskObjectResponse"
+          },
+          "400": {
+            "$ref": "#/responses/ErrorResponse"
+          },
+          "500": {
+            "$ref": "#/responses/ErrorResponse"
+          }
+        }
+      }
+    },
+    "/manager/apps/{app}/database/users/pwd": {
+      "put": {
+        "description": "Reset the app user password\nThis will reset the app user password",
+        "tags": [
+          "apps"
+        ],
+        "summary": "重置服务用户密码",
+        "operationId": "resetAppUserPassword",
+        "parameters": [
+          {
+            "type": "string",
+            "x-go-name": "App",
+            "name": "app",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "Body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/AppUserResetConfig"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": " OK"
+          },
+          "400": {
+            "$ref": "#/responses/ErrorResponse"
+          },
+          "500": {
+            "$ref": "#/responses/ErrorResponse"
+          }
+        }
+      }
+    },
+    "/manager/apps/{id}": {
+      "delete": {
+        "description": "Delete the app\nThis will delete the app",
+        "tags": [
+          "apps"
+        ],
+        "summary": "删除服务",
+        "operationId": "deleteApp",
+        "parameters": [
+          {
+            "type": "string",
+            "x-go-name": "ID",
+            "description": "对象 ID 或者 Name",
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": " Deleted"
+          },
+          "500": {
+            "$ref": "#/responses/ErrorResponse"
+          }
+        }
+      }
+    },
+    "/manager/apps/{id}/arch": {
+      "put": {
+        "description": "Update the app arch requests\nThis will update the app arch requests",
+        "tags": [
+          "apps"
+        ],
+        "summary": "更改服务l架构",
+        "operationId": "updateAppArch",
+        "parameters": [
+          {
+            "type": "string",
+            "x-go-name": "ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "Body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/AppArchOptions"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/TaskObjectResponse"
+          },
+          "400": {
+            "$ref": "#/responses/ErrorResponse"
+          },
+          "500": {
+            "$ref": "#/responses/ErrorResponse"
+          }
+        }
+      }
+    },
+    "/manager/apps/{id}/image": {
+      "put": {
+        "description": "Update the app image\nThis will update the app image",
+        "tags": [
+          "apps"
+        ],
+        "summary": "更改服务镜像",
+        "operationId": "updateAppImage",
+        "parameters": [
+          {
+            "type": "string",
+            "x-go-name": "ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "Body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/AppImageOptions"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/TaskObjectResponse"
+          },
+          "400": {
+            "$ref": "#/responses/ErrorResponse"
+          },
+          "500": {
+            "$ref": "#/responses/ErrorResponse"
+          }
+        }
+      }
+    },
+    "/manager/apps/{id}/resource/requests": {
+      "put": {
+        "description": "Update the app resources requests\nThis will update the app resources requests",
+        "tags": [
+          "apps"
+        ],
+        "summary": "更改服务资源需求",
+        "operationId": "updateAppResources",
+        "parameters": [
+          {
+            "type": "string",
+            "x-go-name": "ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "Body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/AppResourcesOptions"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/TaskObjectResponse"
+          },
+          "400": {
+            "$ref": "#/responses/ErrorResponse"
+          },
+          "500": {
+            "$ref": "#/responses/ErrorResponse"
+          }
+        }
+      }
+    },
+    "/manager/apps/{id}/state": {
+      "put": {
+        "description": "Update the app state\nThis will update the app state",
+        "tags": [
+          "apps"
+        ],
+        "summary": "更改服务状态，启动或停止",
+        "operationId": "updateAppState",
+        "parameters": [
+          {
+            "type": "string",
+            "x-go-name": "ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "Body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/AppStateOptions"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/TaskObjectResponse"
+          },
+          "400": {
+            "$ref": "#/responses/ErrorResponse"
+          },
+          "500": {
+            "$ref": "#/responses/ErrorResponse"
+          }
+        }
+      }
+    },
+    "/manager/apps/{id}/units/{unit}/rebuild": {
+      "put": {
+        "description": "rebuild the app  unit\nThis will rebuild the app unit",
+        "tags": [
+          "apps"
+        ],
+        "summary": "重建服务单元",
+        "operationId": "rebuildUnit",
+        "parameters": [
+          {
+            "type": "string",
+            "x-go-name": "ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "string",
+            "x-go-name": "Unit",
+            "name": "unit",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "Body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/UnitRebuildOptions"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/TaskObjectResponse"
+          },
+          "400": {
+            "$ref": "#/responses/ErrorResponse"
+          },
+          "500": {
+            "$ref": "#/responses/ErrorResponse"
+          }
+        }
+      }
+    },
+    "/manager/apps/{id}/units/{unit}/recovery": {
+      "put": {
+        "description": "recovery the app  unit\nThis will recovery the app unit",
+        "tags": [
+          "apps"
+        ],
+        "summary": "备份数据恢复单元",
+        "operationId": "recoveryUnit",
+        "parameters": [
+          {
+            "type": "string",
+            "x-go-name": "ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "string",
+            "x-go-name": "Unit",
+            "name": "unit",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "Body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/UnitRecoveryOptions"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/TaskObjectResponse"
+          },
+          "400": {
+            "$ref": "#/responses/ErrorResponse"
+          },
+          "500": {
+            "$ref": "#/responses/ErrorResponse"
+          }
+        }
+      }
+    },
+    "/manager/apps/{id}/units/{unit}/state": {
+      "put": {
+        "description": "Update the app  unit state\nThis will update the app unit state",
+        "tags": [
+          "apps"
+        ],
+        "summary": "更改服务单元状态，启动或停止",
+        "operationId": "updateUnitState",
+        "parameters": [
+          {
+            "type": "string",
+            "x-go-name": "ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "string",
+            "x-go-name": "Unit",
+            "name": "unit",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "Body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/AppStateOptions"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/TaskObjectResponse"
+          },
+          "400": {
+            "$ref": "#/responses/ErrorResponse"
+          },
+          "500": {
+            "$ref": "#/responses/ErrorResponse"
+          }
+        }
+      }
+    },
+    "/manager/backup/files": {
+      "get": {
+        "description": "List backup files\nThis will returns a list of backup files",
+        "tags": [
+          "backup"
+        ],
+        "summary": "查询备份文件",
+        "operationId": "listBackupFiles",
+        "parameters": [
+          {
+            "type": "string",
+            "x-go-name": "Site",
+            "name": "site_id",
+            "in": "query"
+          },
+          {
+            "type": "string",
+            "x-go-name": "ID",
+            "name": "id",
+            "in": "query"
+          },
+          {
+            "type": "string",
+            "x-go-name": "Unit",
+            "name": "unit_id",
+            "in": "query"
+          },
+          {
+            "type": "string",
+            "x-go-name": "App",
+            "name": "app_id",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/listBackupFilesResponseWrapper"
+          },
+          "500": {
+            "$ref": "#/responses/ErrorResponse"
+          }
+        }
+      },
+      "delete": {
+        "description": "Delete the backup　file\nThis will delete the backup file",
+        "tags": [
+          "backup"
+        ],
+        "summary": "删除备份文件",
+        "operationId": "deleteBackupFile",
+        "parameters": [
+          {
+            "type": "string",
+            "x-go-name": "ID",
+            "description": "对象 ID 或者 Name",
+            "name": "id",
+            "in": "query"
+          },
+          {
+            "type": "string",
+            "x-go-name": "App",
+            "name": "app_id",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": " Deleted"
+          },
+          "500": {
+            "$ref": "#/responses/ErrorResponse"
+          }
+        }
+      }
+    },
+    "/manager/backup/strategy": {
+      "get": {
+        "description": "List backup strategy\nThis will returns a list of backup strategy",
+        "tags": [
+          "backup"
+        ],
+        "summary": "查询备份策略",
+        "operationId": "listBackupStrategy",
+        "responses": {
+          "200": {
+            "$ref": "#/responses/listBackupStrategyResponseWrapper"
+          },
+          "500": {
+            "$ref": "#/responses/ErrorResponse"
+          }
+        }
+      },
+      "post": {
+        "description": "Add a new app　backup strategy\nThis will create a new app backup strategy",
+        "tags": [
+          "backup"
+        ],
+        "summary": "增加新服务备份策略",
+        "operationId": "postStrategy",
+        "parameters": [
+          {
+            "name": "Body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/BackupStrategyConfig"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "$ref": "#/responses/ObjectResponse"
+          },
+          "400": {
+            "$ref": "#/responses/ErrorResponse"
+          },
+          "500": {
+            "$ref": "#/responses/ErrorResponse"
+          }
+        }
+      },
+      "delete": {
+        "description": "Delete the backup　strategy\nThis will delete the backup strategy",
+        "tags": [
+          "backup"
+        ],
+        "summary": "删除备份策略",
+        "operationId": "deleteBackupStragegy",
+        "parameters": [
+          {
+            "type": "string",
+            "x-go-name": "ID",
+            "description": "对象 ID 或者 Name",
+            "name": "id",
+            "in": "query"
+          },
+          {
+            "type": "string",
+            "x-go-name": "App",
+            "name": "app_id",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": " Deleted"
+          },
+          "500": {
+            "$ref": "#/responses/ErrorResponse"
+          }
+        }
+      }
+    },
+    "/manager/backup/strategy/{id}": {
+      "put": {
+        "description": "Update the app backup strategy\nThis will update the app backup strategy",
+        "tags": [
+          "backup"
+        ],
+        "summary": "更改服务备份策略",
+        "operationId": "updateStragety",
+        "parameters": [
+          {
+            "type": "string",
+            "x-go-name": "ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "Body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/BackupStrategyOptions"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": " OK"
+          },
+          "400": {
+            "$ref": "#/responses/ErrorResponse"
+          },
+          "500": {
+            "$ref": "#/responses/ErrorResponse"
+          }
+        }
+      }
+    },
+    "/manager/clusters": {
+      "get": {
+        "description": "List Clusters\nThis will return a list of clusters by conditions",
+        "tags": [
+          "clusters"
+        ],
+        "summary": "查询集群",
+        "operationId": "listClusters",
+        "parameters": [
+          {
+            "type": "boolean",
+            "x-go-name": "ID",
+            "name": "id",
+            "in": "query"
+          },
+          {
+            "type": "string",
+            "x-go-name": "Name",
+            "name": "name",
+            "in": "query"
+          },
+          {
+            "type": "string",
+            "x-go-name": "Site",
+            "name": "site_id",
+            "in": "query"
+          },
+          {
+            "type": "string",
+            "x-go-name": "Enable",
+            "name": "enabled",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/listClusterResponseWrapper"
+          },
+          "400": {
+            "$ref": "#/responses/ErrorResponse"
+          },
+          "500": {
+            "$ref": "#/responses/ErrorResponse"
+          }
+        }
+      },
+      "post": {
+        "description": "Add a new Cluster\nThis will create a new cluster",
+        "tags": [
+          "clusters"
+        ],
+        "summary": "增加新集群",
+        "operationId": "postCluster",
+        "parameters": [
+          {
+            "name": "Body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/ClusterConfig"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "$ref": "#/responses/ObjectResponse"
+          },
+          "400": {
+            "$ref": "#/responses/ErrorResponse"
+          },
+          "500": {
+            "$ref": "#/responses/ErrorResponse"
+          }
+        }
+      }
+    },
+    "/manager/clusters/{id}": {
+      "put": {
+        "description": "Update a Cluster\nThis will update a cluster",
+        "tags": [
+          "clusters"
+        ],
+        "summary": "更新集群",
+        "operationId": "updateCluster",
+        "parameters": [
+          {
+            "type": "string",
+            "x-go-name": "ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "Body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/ClusterConfig"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/ObjectResponse"
+          },
+          "400": {
+            "$ref": "#/responses/ErrorResponse"
+          },
+          "500": {
+            "$ref": "#/responses/ErrorResponse"
+          }
+        }
+      },
+      "delete": {
+        "description": "Remove a Cluster\nThis will remove a cluster",
+        "tags": [
+          "clusters"
+        ],
+        "summary": "出库集群",
+        "operationId": "deleteCluster",
+        "parameters": [
+          {
+            "type": "string",
+            "x-go-name": "ID",
+            "description": "对象 ID 或者 Name",
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": " Deleted"
+          },
+          "500": {
+            "$ref": "#/responses/ErrorResponse"
+          }
+        }
+      }
+    },
+    "/manager/hosts": {
+      "get": {
+        "description": "List Hosts\nThis will return a list of hosts by conditions",
+        "tags": [
+          "hosts"
+        ],
+        "summary": "查询计算节点信息",
+        "operationId": "listHosts",
+        "parameters": [
+          {
+            "type": "string",
+            "x-go-name": "ID",
+            "name": "id",
+            "in": "query"
+          },
+          {
+            "type": "string",
+            "x-go-name": "Name",
+            "name": "name",
+            "in": "query"
+          },
+          {
+            "type": "string",
+            "x-go-name": "Cluster",
+            "name": "cluster_id",
+            "in": "query"
+          },
+          {
+            "type": "string",
+            "x-go-name": "Site",
+            "name": "site_id",
+            "in": "query"
+          },
+          {
+            "type": "string",
+            "x-go-name": "Enable",
+            "name": "enabled",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/listHostResponseWrapper"
+          },
+          "400": {
+            "$ref": "#/responses/ErrorResponse"
+          },
+          "500": {
+            "$ref": "#/responses/ErrorResponse"
+          }
+        }
+      },
+      "post": {
+        "description": "Add a new Host\nThis will create a new host",
+        "tags": [
+          "hosts"
+        ],
+        "summary": "增加新计算节点",
+        "operationId": "postHost",
+        "parameters": [
+          {
+            "name": "Body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/HostConfig"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "$ref": "#/responses/TaskObjectResponse"
+          },
+          "400": {
+            "$ref": "#/responses/ErrorResponse"
+          },
+          "500": {
+            "$ref": "#/responses/ErrorResponse"
+          }
+        }
+      }
+    },
+    "/manager/hosts/{id}": {
+      "put": {
+        "description": "Update a Host\nThis will update a host",
+        "tags": [
+          "hosts"
+        ],
+        "summary": "更新计算节点信息",
+        "operationId": "updateHost",
+        "parameters": [
+          {
+            "type": "string",
+            "x-go-name": "ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "Body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/HostOptions"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/TaskObjectResponse"
+          },
+          "400": {
+            "$ref": "#/responses/ErrorResponse"
+          },
+          "500": {
+            "$ref": "#/responses/ErrorResponse"
+          }
+        }
+      },
+      "delete": {
+        "description": "Remove a Host\nThis will remove a host",
+        "tags": [
+          "hosts"
+        ],
+        "summary": "出库计算节点信息",
+        "operationId": "deleteHost",
+        "parameters": [
+          {
+            "type": "string",
+            "x-go-name": "ID",
+            "description": "对象 ID 或者 Name",
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": " Deleted"
+          },
+          "500": {
+            "$ref": "#/responses/ErrorResponse"
+          }
+        }
+      }
+    },
+    "/manager/images": {
+      "get": {
+        "description": "List Images\nThis will returns a list of images by conditions",
+        "tags": [
+          "images"
+        ],
+        "summary": "查询镜像信息",
+        "operationId": "listImages",
+        "responses": {
+          "200": {
+            "$ref": "#/responses/listImagesResponseWrapper"
+          },
+          "500": {
+            "$ref": "#/responses/ErrorResponse"
+          }
+        }
+      },
+      "post": {
+        "description": "Add a new Image\nThis will create a new image",
+        "tags": [
+          "images"
+        ],
+        "summary": "增加新镜像",
+        "operationId": "postImage",
+        "parameters": [
+          {
+            "name": "Body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/ImageConfig"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "$ref": "#/responses/TaskObjectResponse"
+          },
+          "400": {
+            "$ref": "#/responses/ErrorResponse"
+          },
+          "500": {
+            "$ref": "#/responses/ErrorResponse"
+          }
+        }
+      }
+    },
+    "/manager/images/templates": {
+      "get": {
+        "description": "List Image Templates\nThis will returns a list of image template by conditions",
+        "tags": [
+          "images"
+        ],
+        "summary": "查询镜像模板信息",
+        "operationId": "listImageTemplates",
+        "responses": {
+          "200": {
+            "$ref": "#/responses/listImageTemplatesResponseWrapper"
+          },
+          "500": {
+            "$ref": "#/responses/ErrorResponse"
+          }
+        }
+      }
+    },
+    "/manager/images/{id}": {
+      "put": {
+        "description": "Update Images\nThis will update the image",
+        "tags": [
+          "images"
+        ],
+        "summary": "更改镜像信息",
+        "operationId": "updateImage",
+        "parameters": [
+          {
+            "type": "string",
+            "x-go-name": "ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "Body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/ImageOptions"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/ObjectResponse"
+          },
+          "400": {
+            "$ref": "#/responses/ErrorResponse"
+          },
+          "500": {
+            "$ref": "#/responses/ErrorResponse"
+          }
+        }
+      },
+      "delete": {
+        "description": "Delete Images\nThis will delete the image by name",
+        "tags": [
+          "images"
+        ],
+        "summary": "删除镜像信息",
+        "operationId": "deleteImage",
+        "parameters": [
+          {
+            "type": "string",
+            "x-go-name": "ID",
+            "description": "对象 ID 或者 Name",
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": " OK"
+          },
+          "500": {
+            "$ref": "#/responses/ErrorResponse"
+          }
+        }
+      }
+    },
+    "/manager/images/{id}/templates": {
+      "put": {
+        "description": "Update Image Template\nThis will update the image template",
+        "tags": [
+          "images"
+        ],
+        "summary": "更改镜像模板信息",
+        "operationId": "updateImageTemplate",
+        "parameters": [
+          {
+            "type": "string",
+            "x-go-name": "ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "Body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/ConfigTemplateOptions"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/TaskObjectResponse"
+          },
+          "400": {
+            "$ref": "#/responses/ErrorResponse"
+          },
+          "500": {
+            "$ref": "#/responses/ErrorResponse"
+          }
+        }
+      }
+    },
+    "/manager/networks": {
+      "get": {
+        "description": "List Networks\nThis will returns a list of networks by options",
+        "tags": [
+          "networks"
+        ],
+        "summary": "查询新网段",
+        "operationId": "listNetworks",
+        "parameters": [
+          {
+            "type": "string",
+            "x-go-name": "Name",
+            "name": "name",
+            "in": "query"
+          },
+          {
+            "type": "string",
+            "x-go-name": "Cluster",
+            "name": "cluster_id",
+            "in": "query"
+          },
+          {
+            "type": "string",
+            "x-go-name": "Site",
+            "name": "site_id",
+            "in": "query"
+          },
+          {
+            "type": "string",
+            "x-go-name": "Topology",
+            "name": "topology",
+            "in": "query"
+          },
+          {
+            "type": "string",
+            "x-go-name": "Enable",
+            "name": "enabled",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/listNetworksResponseWrapper"
+          },
+          "500": {
+            "$ref": "#/responses/ErrorResponse"
+          }
+        }
+      },
+      "post": {
+        "description": "Add a new Network\nThis will create a new network",
+        "tags": [
+          "networks"
+        ],
+        "summary": "增加新网段",
+        "operationId": "postNetwork",
+        "parameters": [
+          {
+            "name": "Body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/NetworkConfig"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "$ref": "#/responses/TaskObjectResponse"
+          },
+          "400": {
+            "$ref": "#/responses/ErrorResponse"
+          },
+          "500": {
+            "$ref": "#/responses/ErrorResponse"
+          }
+        }
+      }
+    },
+    "/manager/networks/{id}": {
+      "put": {
+        "description": "Update Networks\nThis will update the network",
+        "tags": [
+          "networks"
+        ],
+        "summary": "更改网段",
+        "operationId": "updateNetwork",
+        "parameters": [
+          {
+            "type": "string",
+            "x-go-name": "ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "Body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/NetworkOptions"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/ObjectResponse"
+          },
+          "400": {
+            "$ref": "#/responses/ErrorResponse"
+          },
+          "500": {
+            "$ref": "#/responses/ErrorResponse"
+          }
+        }
+      },
+      "delete": {
+        "description": "Update Networks\nThis will update the network",
+        "tags": [
+          "networks"
+        ],
+        "summary": "更改网段",
+        "operationId": "deleteNetwork",
+        "parameters": [
+          {
+            "type": "string",
+            "x-go-name": "ID",
+            "description": "对象 ID 或者 Name",
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": " Deleted"
+          },
+          "500": {
+            "$ref": "#/responses/ErrorResponse"
+          }
+        }
+      }
+    },
+    "/manager/sites": {
+      "get": {
+        "description": "List Site\nThis will returns a list of sites by options",
+        "tags": [
+          "sites"
+        ],
+        "summary": "查询站点",
+        "operationId": "listSites",
+        "parameters": [
+          {
+            "type": "string",
+            "x-go-name": "ID",
+            "name": "id",
+            "in": "query"
+          },
+          {
+            "type": "string",
+            "x-go-name": "Name",
+            "name": "name",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/listSitesResponseWrapper"
+          },
+          "500": {
+            "$ref": "#/responses/ErrorResponse"
+          }
+        }
+      },
+      "post": {
+        "description": "Add a new Site\nThis will create a new site",
+        "tags": [
+          "sites"
+        ],
+        "summary": "增加新站点",
+        "operationId": "postSite",
+        "parameters": [
+          {
+            "name": "Body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/SiteConfig"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "$ref": "#/responses/ObjectResponse"
+          },
+          "400": {
+            "$ref": "#/responses/ErrorResponse"
+          },
+          "500": {
+            "$ref": "#/responses/ErrorResponse"
+          }
+        }
+      }
+    },
+    "/manager/sites/{id}": {
+      "put": {
+        "description": "Update Site\nThis will update the site",
+        "tags": [
+          "sites"
+        ],
+        "summary": "更改站点",
+        "operationId": "updateSite",
+        "parameters": [
+          {
+            "type": "string",
+            "x-go-name": "ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "Body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/SiteOptions"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": " OK"
+          },
+          "500": {
+            "$ref": "#/responses/ErrorResponse"
+          }
+        }
+      },
+      "delete": {
+        "description": "Remote the Site\nThis will remove the site by id",
+        "tags": [
+          "sites"
+        ],
+        "summary": "删除站点",
+        "operationId": "deleteSite",
+        "parameters": [
+          {
+            "type": "string",
+            "x-go-name": "ID",
+            "description": "对象 ID 或者 Name",
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": " OK"
+          },
+          "500": {
+            "$ref": "#/responses/ErrorResponse"
+          }
+        }
+      }
+    },
+    "/manager/storages/remote": {
+      "get": {
+        "description": "List RemoteStorages\nThis will returns a list of remote storage by options",
+        "tags": [
+          "storages"
+        ],
+        "summary": "查询外部存储",
+        "operationId": "listRemoteStorages",
+        "parameters": [
+          {
+            "type": "string",
+            "x-go-name": "ID",
+            "name": "id",
+            "in": "query"
+          },
+          {
+            "type": "string",
+            "x-go-name": "Name",
+            "name": "name",
+            "in": "query"
+          },
+          {
+            "type": "string",
+            "x-go-name": "Site",
+            "name": "site_id",
+            "in": "query"
+          },
+          {
+            "type": "string",
+            "x-go-name": "Enable",
+            "name": "enabled",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/listRemoteStoragesResponseWrapper"
+          },
+          "500": {
+            "$ref": "#/responses/ErrorResponse"
+          }
+        }
+      },
+      "post": {
+        "description": "Add a new RemoteStorage\nThis will create a new remote storage",
+        "tags": [
+          "storages"
+        ],
+        "summary": "增加新外部存储",
+        "operationId": "postRemoteStorage",
+        "parameters": [
+          {
+            "name": "Body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/RemoteStorageConfig"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "$ref": "#/responses/TaskObjectResponse"
+          },
+          "400": {
+            "$ref": "#/responses/ErrorResponse"
+          },
+          "500": {
+            "$ref": "#/responses/ErrorResponse"
+          }
+        }
+      }
+    },
+    "/manager/storages/remote/{id}": {
+      "put": {
+        "description": "Update RemoteStorage\nThis will update the remote storage",
+        "tags": [
+          "storages"
+        ],
+        "summary": "更改外部存储",
+        "operationId": "updateRemoteStorage",
+        "parameters": [
+          {
+            "type": "string",
+            "x-go-name": "ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "Body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/RemoteStorageOptions"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": " OK"
+          },
+          "400": {
+            "$ref": "#/responses/ErrorResponse"
+          },
+          "500": {
+            "$ref": "#/responses/ErrorResponse"
+          }
+        }
+      },
+      "delete": {
+        "description": "Delete RemoteStorage\nThis will delete the remote storage",
+        "tags": [
+          "storages"
+        ],
+        "summary": "删除外部存储",
+        "operationId": "deleteRemoteStorage",
+        "parameters": [
+          {
+            "type": "string",
+            "x-go-name": "ID",
+            "description": "对象 ID 或者 Name",
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": " Deleted"
+          },
+          "500": {
+            "$ref": "#/responses/ErrorResponse"
+          }
+        }
+      }
+    },
+    "/manager/storages/remote/{storage}/pools": {
+      "get": {
+        "description": "List RemoteStorage pools\nThis will returns a list of remote storage pools by options",
+        "tags": [
+          "storages"
+        ],
+        "summary": "查询外部存储池",
+        "operationId": "listRemoteStoragePools",
+        "parameters": [
+          {
+            "type": "string",
+            "x-go-name": "ID",
+            "name": "id",
+            "in": "query"
+          },
+          {
+            "type": "string",
+            "x-go-name": "Name",
+            "name": "name",
+            "in": "query"
+          },
+          {
+            "type": "string",
+            "x-go-name": "Storage",
+            "name": "storage",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/listRemoteStoragePoolsResponseWrapper"
+          },
+          "500": {
+            "$ref": "#/responses/ErrorResponse"
+          }
+        }
+      },
+      "post": {
+        "description": "Add a new Remote Storage Pool\nThis will create a new remote storage poll",
+        "tags": [
+          "storages"
+        ],
+        "summary": "增加新外部存储池",
+        "operationId": "postRemoteStoragePools",
+        "parameters": [
+          {
+            "type": "string",
+            "x-go-name": "Storage",
+            "name": "storage",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "Body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/RemoteStoragePoolConfig"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "$ref": "#/responses/TaskObjectResponse"
+          },
+          "400": {
+            "$ref": "#/responses/ErrorResponse"
+          },
+          "500": {
+            "$ref": "#/responses/ErrorResponse"
+          }
+        }
+      }
+    },
+    "/manager/storages/remote/{storage}/pools/{pool}": {
+      "put": {
+        "description": "Update RemoteStorage pool\nThis will update the remote storage pool",
+        "tags": [
+          "storages"
+        ],
+        "summary": "更改外部存储池",
+        "operationId": "updateRemoteStoragePool",
+        "parameters": [
+          {
+            "type": "string",
+            "x-go-name": "Storage",
+            "name": "storage",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "string",
+            "x-go-name": "Pool",
+            "name": "pool",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "Body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/RemoteStoragePoolOptions"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/ObjectResponse"
+          },
+          "400": {
+            "$ref": "#/responses/ErrorResponse"
+          },
+          "500": {
+            "$ref": "#/responses/ErrorResponse"
+          }
+        }
+      },
+      "delete": {
+        "description": "Delete Remote Storage Pool\nThis will delete the remote storage pool",
+        "tags": [
+          "storages"
+        ],
+        "summary": "删除指定外部存储池",
+        "operationId": "deleteRemoteStoragePool",
+        "parameters": [
+          {
+            "type": "string",
+            "x-go-name": "Storage",
+            "name": "storage",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "string",
+            "x-go-name": "Pool",
+            "description": "对象 ID 或者 Name",
+            "name": "pool",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": " Deleted"
+          },
+          "500": {
+            "$ref": "#/responses/ErrorResponse"
+          }
+        }
+      }
+    },
+    "/manager/tasks": {
+      "get": {
+        "description": "List Tasks\nThis will returns a list of tasks by options",
+        "tags": [
+          "tasks"
+        ],
+        "summary": "查询任务列表",
+        "operationId": "listTasks",
+        "parameters": [
+          {
+            "type": "string",
+            "x-go-name": "ID",
+            "name": "id",
+            "in": "query"
+          },
+          {
+            "type": "string",
+            "x-go-name": "RelateID",
+            "name": "related_id",
+            "in": "query"
+          },
+          {
+            "type": "string",
+            "x-go-name": "Action",
+            "name": "action",
+            "in": "query"
+          },
+          {
+            "type": "string",
+            "x-go-name": "Status",
+            "name": "status",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/listTasksResponseWrapper"
+          },
+          "500": {
+            "$ref": "#/responses/ErrorResponse"
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "AppArchOptions": {
+      "type": "object",
+      "properties": {
+        "spec": {
+          "type": "object",
+          "properties": {
+            "database": {
+              "type": "object",
+              "properties": {
+                "arch": {
+                  "$ref": "#/definitions/Arch"
+                }
+              },
+              "x-go-name": "Database"
+            }
+          },
+          "x-go-name": "Spec"
+        }
+      },
+      "x-go-package": "github.com/upmio/dbscale-kube/cluster_manager/apiserver/api"
+    },
+    "AppConfig": {
+      "type": "object",
+      "properties": {
+        "created_user": {
+          "type": "string",
+          "x-go-name": "User"
+        },
+        "desc": {
+          "type": "string",
+          "x-go-name": "Desc"
+        },
+        "name": {
+          "type": "string",
+          "x-go-name": "Name"
+        },
+        "spec": {
+          "$ref": "#/definitions/AppSpec"
+        }
+      },
+      "x-go-package": "github.com/upmio/dbscale-kube/cluster_manager/apiserver/api"
+    },
+    "AppImageOptions": {
+      "type": "object",
+      "properties": {
+        "spec": {
+          "description": "{\n\"spec\": {\n\"database\": {\n\"image\": {\n\"type\": \"upredis\",\n\"major\": 2,\n\"minor\": 0,\n\"patch\": 0,\n\"build\": 51\n}\n}\n}\n}",
+          "type": "object",
+          "properties": {
+            "database": {
+              "type": "object",
+              "properties": {
+                "image": {
+                  "$ref": "#/definitions/ImageVersion"
+                }
+              },
+              "x-go-name": "Database"
+            }
+          },
+          "x-go-name": "Spec"
+        }
+      },
+      "x-go-package": "github.com/upmio/dbscale-kube/cluster_manager/apiserver/api"
+    },
+    "AppResourcesOptions": {
+      "type": "object",
+      "properties": {
+        "spec": {
+          "description": "{\n\"spec\": {\n\"database\": {\n\"services\": {\n\"units\": {\n\"resources\": {\n\"requests\": {\n\"cpu\": 0.5,\n\"memory\": 1000,\n\"net_bandwidth\": 100,\n\"storage\": {\n\"type\": \"remote\",\n\"performance\": \"high\",\n\"volumes\": [\n{\n\"type\": \"data\",\n\"capacity\": 100\n}\n]\n}\n}\n}\n}\n}\n}\n}\n}",
+          "type": "object",
+          "properties": {
+            "database": {
+              "type": "object",
+              "properties": {
+                "services": {
+                  "type": "object",
+                  "properties": {
+                    "units": {
+                      "type": "object",
+                      "properties": {
+                        "resources": {
+                          "type": "object",
+                          "properties": {
+                            "requests": {
+                              "$ref": "#/definitions/ResourceRequirementsOptions"
+                            }
+                          },
+                          "x-go-name": "Resources"
+                        }
+                      },
+                      "x-go-name": "Units"
+                    }
+                  },
+                  "x-go-name": "Services"
+                }
+              },
+              "x-go-name": "Database"
+            }
+          },
+          "x-go-name": "Spec"
+        }
+      },
+      "x-go-package": "github.com/upmio/dbscale-kube/cluster_manager/apiserver/api"
+    },
+    "AppSchemaConfig": {
+      "$ref": "#/definitions/Schema"
+    },
+    "AppSpec": {
+      "type": "object",
+      "properties": {
+        "database": {
+          "$ref": "#/definitions/GroupSpec"
+        }
+      },
+      "x-go-package": "github.com/upmio/dbscale-kube/cluster_manager/apiserver/api"
+    },
+    "AppStateOptions": {
+      "type": "object",
+      "properties": {
+        "modified_user": {
+          "type": "string",
+          "x-go-name": "User"
+        },
+        "state": {
+          "$ref": "#/definitions/State"
+        }
+      },
+      "x-go-package": "github.com/upmio/dbscale-kube/cluster_manager/apiserver/api"
+    },
+    "AppStatus": {
+      "type": "object",
+      "properties": {
+        "database": {
+          "$ref": "#/definitions/DatabaseServices"
+        }
+      },
+      "x-go-package": "github.com/upmio/dbscale-kube/cluster_manager/apiserver/api"
+    },
+    "AppUserConfig": {
+      "type": "object",
+      "properties": {
+        "auth_type": {
+          "type": "string",
+          "x-go-name": "AuthType",
+          "example": "mysql_native_password"
+        },
+        "db_privileges": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/DatabasePrivilege"
+          },
+          "x-go-name": "Privileges"
+        },
+        "ip": {
+          "$ref": "#/definitions/IP"
+        },
+        "login": {
+          "$ref": "#/definitions/Login"
+        },
+        "name": {
+          "type": "string",
+          "x-go-name": "Name",
+          "example": "zhang"
+        },
+        "pwd": {
+          "type": "string",
+          "x-go-name": "Password",
+          "example": "qwertyuiop"
+        }
+      },
+      "x-go-package": "github.com/upmio/dbscale-kube/cluster_manager/apiserver/api"
+    },
+    "AppUserResetConfig": {
+      "type": "object",
+      "properties": {
+        "auth_type": {
+          "type": "string",
+          "x-go-name": "AuthType"
+        },
+        "ip": {
+          "type": "string",
+          "x-go-name": "IP"
+        },
+        "name": {
+          "type": "string",
+          "x-go-name": "Name"
+        },
+        "pwd": {
+          "type": "string",
+          "x-go-name": "Password"
+        }
+      },
+      "x-go-package": "github.com/upmio/dbscale-kube/cluster_manager/apiserver/api"
+    },
+    "AppUsersResponse": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/DatabaseUser"
+      },
+      "x-go-package": "github.com/upmio/dbscale-kube/cluster_manager/apiserver/api"
+    },
+    "Application": {
+      "type": "object",
+      "properties": {
+        "created": {
+          "$ref": "#/definitions/Editor"
+        },
+        "desc": {
+          "type": "string",
+          "x-go-name": "Desc"
+        },
+        "id": {
+          "type": "string",
+          "x-go-name": "ID"
+        },
+        "modified": {
+          "$ref": "#/definitions/Editor"
+        },
+        "name": {
+          "type": "string",
+          "x-go-name": "Name"
+        },
+        "spec": {
+          "$ref": "#/definitions/AppSpec"
+        },
+        "state": {
+          "$ref": "#/definitions/State"
+        },
+        "status": {
+          "$ref": "#/definitions/AppStatus"
+        },
+        "task": {
+          "$ref": "#/definitions/TaskBrief"
+        }
+      },
+      "x-go-package": "github.com/upmio/dbscale-kube/cluster_manager/apiserver/api"
+    },
+    "AppsResponse": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/Application"
+      },
+      "x-go-package": "github.com/upmio/dbscale-kube/cluster_manager/apiserver/api"
+    },
+    "Arch": {
+      "type": "object",
+      "properties": {
+        "mode": {
+          "type": "string",
+          "enum": [
+            "single",
+            "clone",
+            "replication_async",
+            "repliction_semi_sync"
+          ],
+          "x-go-name": "Mode"
+        },
+        "replicas": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "Replicas"
+        }
+      },
+      "x-go-package": "github.com/upmio/dbscale-kube/cluster_manager/apiserver/api"
+    },
+    "Auth": {
+      "type": "object",
+      "properties": {
+        "ip": {
+          "$ref": "#/definitions/IP"
+        },
+        "password": {
+          "type": "string",
+          "x-go-name": "Password"
+        },
+        "port": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "Port"
+        },
+        "username": {
+          "type": "string",
+          "x-go-name": "User"
+        }
+      },
+      "x-go-package": "github.com/upmio/dbscale-kube/cluster_manager/apiserver/api"
+    },
+    "Backup": {
+      "type": "object",
+      "properties": {
+        "Storage": {
+          "$ref": "#/definitions/BackupStorage"
+        }
+      },
+      "x-go-package": "github.com/upmio/dbscale-kube/cluster_manager/apiserver/api"
+    },
+    "BackupFile": {
+      "type": "object",
+      "properties": {
+        "app": {
+          "$ref": "#/definitions/IDName"
+        },
+        "backup_storage": {
+          "$ref": "#/definitions/IDName"
+        },
+        "create_at": {
+          "$ref": "#/definitions/Time"
+        },
+        "created_user": {
+          "type": "string",
+          "x-go-name": "User"
+        },
+        "expire_at": {
+          "$ref": "#/definitions/Time"
+        },
+        "finish_at": {
+          "$ref": "#/definitions/Time"
+        },
+        "id": {
+          "type": "string",
+          "x-go-name": "ID"
+        },
+        "name": {
+          "type": "string",
+          "x-go-name": "Name"
+        },
+        "path": {
+          "type": "string",
+          "x-go-name": "Path"
+        },
+        "site": {
+          "$ref": "#/definitions/IDName"
+        },
+        "size": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "Size"
+        },
+        "type": {
+          "$ref": "#/definitions/BackupType"
+        },
+        "unit": {
+          "$ref": "#/definitions/IDName"
+        },
+        "valid": {
+          "type": "boolean",
+          "x-go-name": "Valid"
+        }
+      },
+      "x-go-package": "github.com/upmio/dbscale-kube/cluster_manager/apiserver/api"
+    },
+    "BackupFilesResponse": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/BackupFile"
+      },
+      "x-go-package": "github.com/upmio/dbscale-kube/cluster_manager/apiserver/api"
+    },
+    "BackupStorage": {
+      "type": "object",
+      "properties": {
+        "capacity": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "Capacity"
+        },
+        "performance": {
+          "$ref": "#/definitions/Performance"
+        },
+        "type": {
+          "type": "string",
+          "x-go-name": "Type"
+        }
+      },
+      "x-go-package": "github.com/upmio/dbscale-kube/cluster_manager/apiserver/api"
+    },
+    "BackupStrategy": {
+      "type": "object",
+      "properties": {
+        "app_id": {
+          "type": "string",
+          "x-go-name": "App"
+        },
+        "created": {
+          "$ref": "#/definitions/Editor"
+        },
+        "desc": {
+          "type": "string",
+          "x-go-name": "Desc"
+        },
+        "id": {
+          "type": "string",
+          "x-go-name": "ID"
+        },
+        "modified": {
+          "$ref": "#/definitions/Editor"
+        },
+        "name": {
+          "type": "string",
+          "x-go-name": "Name"
+        },
+        "role": {
+          "type": "string",
+          "x-go-name": "Role"
+        },
+        "schedule": {
+          "type": "string",
+          "x-go-name": "Schedule"
+        },
+        "stroage": {
+          "type": "string",
+          "x-go-name": "Storage"
+        },
+        "tables": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-go-name": "Tables"
+        },
+        "type": {
+          "$ref": "#/definitions/BackupType"
+        },
+        "unit_id": {
+          "type": "string",
+          "x-go-name": "Unit"
+        }
+      },
+      "x-go-package": "github.com/upmio/dbscale-kube/cluster_manager/apiserver/api"
+    },
+    "BackupStrategyConfig": {
+      "type": "object",
+      "properties": {
+        "app_id": {
+          "type": "string",
+          "x-go-name": "App"
+        },
+        "created_user": {
+          "type": "string",
+          "x-go-name": "User"
+        },
+        "desc": {
+          "type": "string",
+          "x-go-name": "Desc"
+        },
+        "enabled": {
+          "type": "boolean",
+          "x-go-name": "Enabled"
+        },
+        "name": {
+          "type": "string",
+          "x-go-name": "Name"
+        },
+        "once": {
+          "type": "boolean",
+          "x-go-name": "Once"
+        },
+        "retention": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "Retention"
+        },
+        "role": {
+          "type": "string",
+          "x-go-name": "Role"
+        },
+        "schedule": {
+          "type": "string",
+          "x-go-name": "Schedule"
+        },
+        "stroage": {
+          "type": "string",
+          "x-go-name": "Storage"
+        },
+        "tables": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-go-name": "Tables"
+        },
+        "type": {
+          "$ref": "#/definitions/BackupType"
+        },
+        "unit_id": {
+          "type": "string",
+          "x-go-name": "Unit"
+        }
+      },
+      "x-go-package": "github.com/upmio/dbscale-kube/cluster_manager/apiserver/api"
+    },
+    "BackupStrategyOptions": {
+      "type": "object",
+      "properties": {
+        "app_id": {
+          "type": "string",
+          "x-go-name": "App"
+        },
+        "desc": {
+          "type": "string",
+          "x-go-name": "Desc"
+        },
+        "enabled": {
+          "type": "boolean",
+          "x-go-name": "Enabled"
+        },
+        "modified_user": {
+          "type": "string",
+          "x-go-name": "User"
+        },
+        "retention": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "Retention"
+        },
+        "schedule": {
+          "type": "string",
+          "x-go-name": "Schedule"
+        },
+        "type": {
+          "type": "string",
+          "x-go-name": "Type"
+        },
+        "unit_id": {
+          "type": "string",
+          "x-go-name": "Unit"
+        }
+      },
+      "x-go-package": "github.com/upmio/dbscale-kube/cluster_manager/apiserver/api"
+    },
+    "BackupStrategyResponse": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/BackupStrategy"
+      },
+      "x-go-package": "github.com/upmio/dbscale-kube/cluster_manager/apiserver/api"
+    },
+    "BackupType": {
+      "type": "string",
+      "x-go-package": "github.com/upmio/dbscale-kube/cluster_manager/apiserver/api"
+    },
+    "Cluster": {
+      "type": "object",
+      "properties": {
+        "created": {
+          "$ref": "#/definitions/Editor"
+        },
+        "desc": {
+          "type": "string",
+          "x-go-name": "Desc"
+        },
+        "enabled": {
+          "type": "boolean",
+          "x-go-name": "Enabled"
+        },
+        "ha_tag": {
+          "type": "string",
+          "x-go-name": "HATag"
+        },
+        "id": {
+          "type": "string",
+          "x-go-name": "ID"
+        },
+        "image_type": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-go-name": "Images"
+        },
+        "modified": {
+          "$ref": "#/definitions/Editor"
+        },
+        "name": {
+          "type": "string",
+          "x-go-name": "Name"
+        },
+        "network": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/IDName"
+          },
+          "x-go-name": "Networks"
+        },
+        "site": {
+          "$ref": "#/definitions/IDName"
+        },
+        "zone": {
+          "type": "string",
+          "x-go-name": "Zone"
+        }
+      },
+      "x-go-package": "github.com/upmio/dbscale-kube/cluster_manager/apiserver/api"
+    },
+    "ClusterConfig": {
+      "type": "object",
+      "properties": {
+        "created_user": {
+          "type": "string",
+          "x-go-name": "User"
+        },
+        "desc": {
+          "type": "string",
+          "x-go-name": "Desc"
+        },
+        "enabled": {
+          "type": "boolean",
+          "x-go-name": "Enabled"
+        },
+        "ha_tag": {
+          "type": "string",
+          "x-go-name": "HATag"
+        },
+        "image_type": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-go-name": "Images"
+        },
+        "name": {
+          "type": "string",
+          "x-go-name": "Name"
+        },
+        "site_id": {
+          "type": "string",
+          "x-go-name": "Site"
+        },
+        "zone": {
+          "type": "string",
+          "x-go-name": "Zone"
+        }
+      },
+      "x-go-package": "github.com/upmio/dbscale-kube/cluster_manager/apiserver/api"
+    },
+    "ClustersResponse": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/Cluster"
+      },
+      "x-go-package": "github.com/upmio/dbscale-kube/cluster_manager/apiserver/api"
+    },
+    "Condition": {
+      "type": "object",
+      "properties": {
+        "candidates_id": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-go-name": "Candidates"
+        },
+        "high_availability": {
+          "type": "boolean",
+          "x-go-name": "HighAvailability"
+        }
+      },
+      "x-go-package": "github.com/upmio/dbscale-kube/cluster_manager/apiserver/api"
+    },
+    "Conditions": {
+      "type": "object",
+      "properties": {
+        "cluster": {
+          "$ref": "#/definitions/Condition"
+        },
+        "host": {
+          "$ref": "#/definitions/Condition"
+        },
+        "network": {
+          "$ref": "#/definitions/Condition"
+        },
+        "storage_remote": {
+          "$ref": "#/definitions/Condition"
+        }
+      },
+      "x-go-package": "github.com/upmio/dbscale-kube/cluster_manager/apiserver/api"
+    },
+    "ConfigTemplate": {
+      "type": "object",
+      "properties": {
+        "config_file": {
+          "type": "string",
+          "x-go-name": "ConfigFile"
+        },
+        "keysets": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Keyset"
+          },
+          "x-go-name": "Keysets"
+        }
+      },
+      "x-go-package": "github.com/upmio/dbscale-kube/cluster_manager/apiserver/api"
+    },
+    "ConfigTemplateOptions": {
+      "type": "object",
+      "properties": {
+        "keysets": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Keyset"
+          },
+          "x-go-name": "Keysets"
+        }
+      },
+      "x-go-package": "github.com/upmio/dbscale-kube/cluster_manager/apiserver/api"
+    },
+    "ContainerPort": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "x-go-name": "Name"
+        },
+        "port": {
+          "type": "integer",
+          "format": "int32",
+          "x-go-name": "Port"
+        }
+      },
+      "x-go-package": "github.com/upmio/dbscale-kube/cluster_manager/apiserver/api"
+    },
+    "DBSchemaDetail": {
+      "type": "object",
+      "properties": {
+        "character_set": {
+          "type": "string",
+          "x-go-name": "Character",
+          "example": "utf8mb4"
+        },
+        "name": {
+          "type": "string",
+          "x-go-name": "Name"
+        },
+        "tables": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/DBTable"
+          },
+          "x-go-name": "Tables"
+        }
+      },
+      "x-go-package": "github.com/upmio/dbscale-kube/cluster_manager/apiserver/api"
+    },
+    "DBSchemaDetailResponse": {
+      "$ref": "#/definitions/DBSchemaDetail"
+    },
+    "DBSchemaResponse": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/Schema"
+      },
+      "x-go-package": "github.com/upmio/dbscale-kube/cluster_manager/apiserver/api"
+    },
+    "DBTable": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "x-go-name": "Name"
+        },
+        "size": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "Size"
+        }
+      },
+      "x-go-package": "github.com/upmio/dbscale-kube/cluster_manager/apiserver/api"
+    },
+    "DatabasePrivilege": {
+      "type": "object",
+      "properties": {
+        "db_name": {
+          "type": "string",
+          "x-go-name": "DBName",
+          "example": "abc"
+        },
+        "privileges": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-go-name": "Privileges",
+          "example": [
+            "SELECT",
+            "UPDATE"
+          ]
+        }
+      },
+      "x-go-package": "github.com/upmio/dbscale-kube/cluster_manager/apiserver/api"
+    },
+    "DatabaseServices": {
+      "type": "object",
+      "properties": {
+        "services": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/GroupStatus"
+          },
+          "x-go-name": "Services"
+        }
+      },
+      "x-go-package": "github.com/upmio/dbscale-kube/cluster_manager/apiserver/api"
+    },
+    "DatabaseUser": {
+      "type": "object",
+      "properties": {
+        "auth_type": {
+          "type": "string",
+          "x-go-name": "AuthType",
+          "example": "mysql_native_password"
+        },
+        "db_privileges": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/DatabasePrivilege"
+          },
+          "x-go-name": "Privileges"
+        },
+        "ip": {
+          "$ref": "#/definitions/IP"
+        },
+        "name": {
+          "type": "string",
+          "x-go-name": "Name",
+          "example": "zhang"
+        },
+        "pwd": {
+          "type": "string",
+          "x-go-name": "Password",
+          "example": "qwertyuiop"
+        }
+      },
+      "x-go-package": "github.com/upmio/dbscale-kube/cluster_manager/apiserver/api"
+    },
+    "Editor": {
+      "type": "object",
+      "properties": {
+        "timestamp": {
+          "$ref": "#/definitions/Time"
+        },
+        "user": {
+          "type": "string",
+          "x-go-name": "User"
+        }
+      },
+      "x-go-package": "github.com/upmio/dbscale-kube/cluster_manager/apiserver/api"
+    },
+    "GroupSpec": {
+      "type": "object",
+      "properties": {
+        "image": {
+          "$ref": "#/definitions/ImageVersion"
+        },
+        "services": {
+          "$ref": "#/definitions/ServiceSpec"
+        }
+      },
+      "x-go-package": "github.com/upmio/dbscale-kube/cluster_manager/apiserver/api"
+    },
+    "GroupStatus": {
+      "type": "object",
+      "properties": {
+        "arch": {
+          "$ref": "#/definitions/Arch"
+        },
+        "name": {
+          "type": "string",
+          "x-go-name": "Name"
+        },
+        "ports": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ContainerPort"
+          },
+          "x-go-name": "Ports"
+        },
+        "units": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/UnitInfo"
+          },
+          "x-go-name": "Units"
+        }
+      },
+      "x-go-package": "github.com/upmio/dbscale-kube/cluster_manager/apiserver/api"
+    },
+    "Host": {
+      "type": "object",
+      "properties": {
+        "cluster": {
+          "$ref": "#/definitions/IDName"
+        },
+        "created": {
+          "$ref": "#/definitions/Editor"
+        },
+        "desc": {
+          "type": "string",
+          "x-go-name": "Desc"
+        },
+        "enabled": {
+          "type": "boolean",
+          "x-go-name": "Enabled"
+        },
+        "id": {
+          "type": "string",
+          "x-go-name": "ID"
+        },
+        "max_unit": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "MaxUnit"
+        },
+        "max_usage": {
+          "$ref": "#/definitions/MaxUsage"
+        },
+        "modified": {
+          "$ref": "#/definitions/Editor"
+        },
+        "node": {
+          "$ref": "#/definitions/NodeInfo"
+        },
+        "ntp_server": {
+          "type": "string",
+          "x-go-name": "NTPServer"
+        },
+        "room": {
+          "description": "机房",
+          "type": "string",
+          "x-go-name": "Room"
+        },
+        "seat": {
+          "description": "位",
+          "type": "string",
+          "x-go-name": "Seat"
+        },
+        "storage_host": {
+          "description": "本地存储",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/HostStorageBrief"
+          },
+          "x-go-name": "HostStorages"
+        },
+        "storage_remote": {
+          "$ref": "#/definitions/IDName"
+        },
+        "task": {
+          "$ref": "#/definitions/TaskBrief"
+        },
+        "units": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/UnitBrief"
+          },
+          "x-go-name": "Units"
+        }
+      },
+      "x-go-package": "github.com/upmio/dbscale-kube/cluster_manager/apiserver/api"
+    },
+    "HostConfig": {
+      "type": "object",
+      "properties": {
+        "cluster_id": {
+          "description": "名称\nName    string `json:\"name\"`",
+          "type": "string",
+          "x-go-name": "Cluster"
+        },
+        "created_user": {
+          "type": "string",
+          "x-go-name": "User"
+        },
+        "desc": {
+          "description": "描述",
+          "type": "string",
+          "x-go-name": "Desc"
+        },
+        "enabled": {
+          "type": "boolean",
+          "x-go-name": "Enabled"
+        },
+        "max_unit": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "MaxUnit"
+        },
+        "max_usage": {
+          "$ref": "#/definitions/MaxUsage"
+        },
+        "ntp_server": {
+          "type": "string",
+          "x-go-name": "NTPServer"
+        },
+        "room": {
+          "description": "机房",
+          "type": "string",
+          "x-go-name": "Room"
+        },
+        "seat": {
+          "description": "位",
+          "type": "string",
+          "x-go-name": "Seat"
+        },
+        "ssh": {
+          "$ref": "#/definitions/Auth"
+        },
+        "storage_host": {
+          "description": "本地存储",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/HostStorage"
+          },
+          "x-go-name": "HostStorages"
+        },
+        "storage_remote_id": {
+          "description": "远程存储系统",
+          "type": "string",
+          "x-go-name": "RemoteStorage"
+        }
+      },
+      "x-go-package": "github.com/upmio/dbscale-kube/cluster_manager/apiserver/api"
+    },
+    "HostOptions": {
+      "type": "object",
+      "properties": {
+        "desc": {
+          "type": "string",
+          "x-go-name": "Desc"
+        },
+        "enabled": {
+          "type": "boolean",
+          "x-go-name": "Enabled"
+        },
+        "max_unit": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "MaxUnit"
+        },
+        "max_usage": {
+          "type": "object",
+          "properties": {
+            "cpu": {
+              "type": "integer",
+              "format": "int64",
+              "x-go-name": "CPU"
+            },
+            "mem": {
+              "type": "integer",
+              "format": "int64",
+              "x-go-name": "Memory"
+            },
+            "net_bandwidth": {
+              "type": "integer",
+              "format": "int64",
+              "x-go-name": "NetBandwidth"
+            },
+            "storage_host": {
+              "type": "integer",
+              "format": "int64",
+              "x-go-name": "HostStorage"
+            }
+          },
+          "x-go-name": "MaxUsage"
+        },
+        "modified_user": {
+          "type": "string",
+          "x-go-name": "User"
+        },
+        "room": {
+          "type": "string",
+          "x-go-name": "Room"
+        },
+        "seat": {
+          "type": "string",
+          "x-go-name": "Seat"
+        }
+      },
+      "x-go-package": "github.com/upmio/dbscale-kube/cluster_manager/apiserver/api"
+    },
+    "HostStorage": {
+      "type": "object",
+      "properties": {
+        "paths": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-go-name": "Paths"
+        },
+        "performance": {
+          "$ref": "#/definitions/Performance"
+        }
+      },
+      "x-go-package": "github.com/upmio/dbscale-kube/cluster_manager/apiserver/api"
+    },
+    "HostStorageBrief": {
+      "type": "object",
+      "properties": {
+        "capacity": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "Capacity"
+        },
+        "paths": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-go-name": "Paths"
+        },
+        "performance": {
+          "$ref": "#/definitions/Performance"
+        },
+        "used": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "Used"
+        }
+      },
+      "x-go-package": "github.com/upmio/dbscale-kube/cluster_manager/apiserver/api"
+    },
+    "HostsResponse": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/Host"
+      },
+      "x-go-package": "github.com/upmio/dbscale-kube/cluster_manager/apiserver/api"
+    },
+    "IDName": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "x-go-name": "ID"
+        },
+        "name": {
+          "type": "string",
+          "x-go-name": "Name"
+        }
+      },
+      "x-go-package": "github.com/upmio/dbscale-kube/cluster_manager/apiserver/api"
+    },
+    "IP": {
+      "type": "string",
+      "x-go-package": "github.com/upmio/dbscale-kube/cluster_manager/apiserver/api"
+    },
+    "IPSummary": {
+      "type": "object",
+      "properties": {
+        "end_ip": {
+          "$ref": "#/definitions/IP"
+        },
+        "gateway": {
+          "$ref": "#/definitions/IP"
+        },
+        "prefix": {
+          "description": "掩码",
+          "type": "integer",
+          "format": "int32",
+          "x-go-name": "Prefix"
+        },
+        "start_ip": {
+          "$ref": "#/definitions/IP"
+        },
+        "total": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "Total"
+        },
+        "used": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "Used"
+        },
+        "vlan": {
+          "description": "Vlan ID",
+          "type": "integer",
+          "format": "int32",
+          "x-go-name": "VLan"
+        }
+      },
+      "x-go-package": "github.com/upmio/dbscale-kube/cluster_manager/apiserver/api"
+    },
+    "Image": {
+      "type": "object",
+      "properties": {
+        "build": {
+          "description": "编译版本号",
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "Dev"
+        },
+        "created": {
+          "$ref": "#/definitions/Editor"
+        },
+        "desc": {
+          "type": "string",
+          "x-go-name": "Desc"
+        },
+        "enabled": {
+          "type": "boolean",
+          "x-go-name": "Enabled"
+        },
+        "id": {
+          "type": "string",
+          "x-go-name": "ID"
+        },
+        "major": {
+          "description": "主版本号",
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "Major"
+        },
+        "minor": {
+          "description": "小版本号",
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "Minor"
+        },
+        "modified": {
+          "$ref": "#/definitions/Editor"
+        },
+        "patch": {
+          "description": "小更新版本号",
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "Patch"
+        },
+        "task": {
+          "$ref": "#/definitions/TaskBrief"
+        },
+        "type": {
+          "description": "Registry string `json:\"-\"`\n名称",
+          "type": "string",
+          "x-go-name": "Type",
+          "example": "mysql"
+        }
+      },
+      "x-go-package": "github.com/upmio/dbscale-kube/cluster_manager/apiserver/api"
+    },
+    "ImageConfig": {
+      "type": "object",
+      "properties": {
+        "build": {
+          "description": "编译版本号",
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "Dev"
+        },
+        "created_user": {
+          "type": "string",
+          "x-go-name": "User"
+        },
+        "desc": {
+          "type": "string",
+          "x-go-name": "Desc"
+        },
+        "enabled": {
+          "type": "boolean",
+          "x-go-name": "Enabled"
+        },
+        "id": {
+          "type": "string",
+          "x-go-name": "ID"
+        },
+        "major": {
+          "description": "主版本号",
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "Major"
+        },
+        "minor": {
+          "description": "小版本号",
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "Minor"
+        },
+        "patch": {
+          "description": "小更新版本号",
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "Patch"
+        },
+        "type": {
+          "description": "Registry string `json:\"-\"`\n名称",
+          "type": "string",
+          "x-go-name": "Type",
+          "example": "mysql"
+        }
+      },
+      "x-go-package": "github.com/upmio/dbscale-kube/cluster_manager/apiserver/api"
+    },
+    "ImageOptions": {
+      "type": "object",
+      "properties": {
+        "desc": {
+          "type": "string",
+          "x-go-name": "Desc"
+        },
+        "enabled": {
+          "type": "boolean",
+          "x-go-name": "Enabled"
+        },
+        "modified_user": {
+          "type": "string",
+          "x-go-name": "User"
+        }
+      },
+      "x-go-package": "github.com/upmio/dbscale-kube/cluster_manager/apiserver/api"
+    },
+    "ImageTemplate": {
+      "type": "object",
+      "properties": {
+        "image": {
+          "$ref": "#/definitions/ImageVersion"
+        },
+        "template": {
+          "$ref": "#/definitions/ConfigTemplate"
+        }
+      },
+      "x-go-package": "github.com/upmio/dbscale-kube/cluster_manager/apiserver/api"
+    },
+    "ImageTemplatesResponse": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/ImageTemplate"
+      },
+      "x-go-package": "github.com/upmio/dbscale-kube/cluster_manager/apiserver/api"
+    },
+    "ImageVersion": {
+      "description": "镜像版本",
+      "type": "object",
+      "properties": {
+        "build": {
+          "description": "编译版本号",
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "Dev"
+        },
+        "id": {
+          "type": "string",
+          "x-go-name": "ID"
+        },
+        "major": {
+          "description": "主版本号",
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "Major"
+        },
+        "minor": {
+          "description": "小版本号",
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "Minor"
+        },
+        "patch": {
+          "description": "小更新版本号",
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "Patch"
+        },
+        "type": {
+          "description": "Registry string `json:\"-\"`\n名称",
+          "type": "string",
+          "x-go-name": "Type",
+          "example": "mysql"
+        }
+      },
+      "x-go-package": "github.com/upmio/dbscale-kube/cluster_manager/apiserver/api"
+    },
+    "ImagesResponse": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/Image"
+      },
+      "x-go-package": "github.com/upmio/dbscale-kube/cluster_manager/apiserver/api"
+    },
+    "Keyset": {
+      "type": "object",
+      "properties": {
+        "can_set": {
+          "type": "boolean",
+          "x-go-name": "CanSet"
+        },
+        "default": {
+          "type": "string",
+          "x-go-name": "Default"
+        },
+        "desc": {
+          "type": "string",
+          "x-go-name": "Desc"
+        },
+        "key": {
+          "type": "string",
+          "x-go-name": "Key"
+        },
+        "must_restart": {
+          "type": "boolean",
+          "x-go-name": "MustRestart"
+        },
+        "range": {
+          "type": "string",
+          "x-go-name": "Range"
+        },
+        "value": {
+          "type": "string",
+          "x-go-name": "Value"
+        }
+      },
+      "x-go-package": "github.com/upmio/dbscale-kube/cluster_manager/apiserver/api"
+    },
+    "Login": {
+      "type": "object",
+      "properties": {
+        "password": {
+          "type": "string",
+          "x-go-name": "Password",
+          "example": "admin"
+        },
+        "user": {
+          "type": "string",
+          "x-go-name": "User",
+          "example": "admin"
+        }
+      },
+      "x-go-package": "github.com/upmio/dbscale-kube/cluster_manager/apiserver/api"
+    },
+    "MaxUsage": {
+      "type": "object",
+      "properties": {
+        "cpu": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "CPU"
+        },
+        "mem": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "Memory"
+        },
+        "net_bandwidth": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "NetBandwidth"
+        },
+        "storage_host": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "HostStorage"
+        }
+      },
+      "x-go-package": "github.com/upmio/dbscale-kube/cluster_manager/apiserver/api"
+    },
+    "Network": {
+      "type": "object",
+      "properties": {
+        "cluster": {
+          "$ref": "#/definitions/IDName"
+        },
+        "created": {
+          "$ref": "#/definitions/Editor"
+        },
+        "desc": {
+          "type": "string",
+          "x-go-name": "Desc"
+        },
+        "enabled": {
+          "type": "boolean",
+          "x-go-name": "Enabled"
+        },
+        "id": {
+          "type": "string",
+          "x-go-name": "ID"
+        },
+        "ip_summary": {
+          "$ref": "#/definitions/IPSummary"
+        },
+        "modified": {
+          "$ref": "#/definitions/Editor"
+        },
+        "name": {
+          "type": "string",
+          "x-go-name": "Name"
+        },
+        "site": {
+          "$ref": "#/definitions/IDName"
+        },
+        "topology": {
+          "description": "拓扑",
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-go-name": "Topology"
+        }
+      },
+      "x-go-package": "github.com/upmio/dbscale-kube/cluster_manager/apiserver/api"
+    },
+    "NetworkConfig": {
+      "type": "object",
+      "properties": {
+        "cluster_id": {
+          "description": "集群",
+          "type": "string",
+          "x-go-name": "Cluster"
+        },
+        "created_user": {
+          "type": "string",
+          "x-go-name": "User"
+        },
+        "desc": {
+          "type": "string",
+          "x-go-name": "Desc"
+        },
+        "enabled": {
+          "type": "boolean",
+          "x-go-name": "Enabled"
+        },
+        "ip_summary": {
+          "$ref": "#/definitions/Route"
+        },
+        "site_id": {
+          "description": "名称",
+          "type": "string",
+          "x-go-name": "Site"
+        },
+        "topology": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-go-name": "Topology"
+        }
+      },
+      "x-go-package": "github.com/upmio/dbscale-kube/cluster_manager/apiserver/api"
+    },
+    "NetworkOptions": {
+      "type": "object",
+      "properties": {
+        "cluster_id": {
+          "description": "集群",
+          "type": "string",
+          "x-go-name": "Cluster"
+        },
+        "desc": {
+          "type": "string",
+          "x-go-name": "Desc"
+        },
+        "enabled": {
+          "type": "boolean",
+          "x-go-name": "Enabled"
+        },
+        "modified_user": {
+          "type": "string",
+          "x-go-name": "User"
+        },
+        "topology": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-go-name": "Topology"
+        }
+      },
+      "x-go-package": "github.com/upmio/dbscale-kube/cluster_manager/apiserver/api"
+    },
+    "NetworksResponse": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/Network"
+      },
+      "x-go-package": "github.com/upmio/dbscale-kube/cluster_manager/apiserver/api"
+    },
+    "NodeBrief": {
+      "type": "object",
+      "properties": {
+        "cluster": {
+          "$ref": "#/definitions/IDName"
+        },
+        "host_ip": {
+          "type": "string",
+          "x-go-name": "IP"
+        },
+        "id": {
+          "type": "string",
+          "x-go-name": "ID"
+        },
+        "name": {
+          "type": "string",
+          "x-go-name": "Name"
+        }
+      },
+      "x-go-package": "github.com/upmio/dbscale-kube/cluster_manager/apiserver/api"
+    },
+    "NodeInfo": {
+      "type": "object",
+      "properties": {
+        "cpu": {
+          "$ref": "#/definitions/ResourceStatus"
+        },
+        "ip": {
+          "type": "string",
+          "x-go-name": "IP"
+        },
+        "memory": {
+          "$ref": "#/definitions/ResourceStatus"
+        },
+        "name": {
+          "type": "string",
+          "x-go-name": "Name"
+        },
+        "net_bandwidth": {
+          "$ref": "#/definitions/ResourceStatus"
+        },
+        "os": {
+          "type": "string",
+          "x-go-name": "Os"
+        }
+      },
+      "x-go-package": "github.com/upmio/dbscale-kube/cluster_manager/apiserver/api"
+    },
+    "Performance": {
+      "type": "string",
+      "x-go-package": "github.com/upmio/dbscale-kube/cluster_manager/apiserver/api"
+    },
+    "RemoteStorage": {
+      "type": "object",
+      "properties": {
+        "auth": {
+          "$ref": "#/definitions/Auth"
+        },
+        "capacity": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "Capacity"
+        },
+        "created": {
+          "$ref": "#/definitions/Editor"
+        },
+        "desc": {
+          "type": "string",
+          "x-go-name": "Desc"
+        },
+        "enabled": {
+          "type": "boolean",
+          "x-go-name": "Enabled"
+        },
+        "id": {
+          "type": "string",
+          "x-go-name": "ID"
+        },
+        "model": {
+          "type": "string",
+          "x-go-name": "Model"
+        },
+        "modified": {
+          "$ref": "#/definitions/Editor"
+        },
+        "name": {
+          "type": "string",
+          "x-go-name": "Name"
+        },
+        "site": {
+          "$ref": "#/definitions/IDName"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "passing",
+            "critical",
+            "unknown"
+          ],
+          "x-go-name": "Status"
+        },
+        "task": {
+          "$ref": "#/definitions/TaskBrief"
+        },
+        "type": {
+          "description": "主机注册类型",
+          "type": "string",
+          "enum": [
+            "FC",
+            "iSCSI"
+          ],
+          "x-go-name": "Type"
+        },
+        "used": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "Used"
+        },
+        "vendor": {
+          "type": "string",
+          "x-go-name": "Vendor"
+        }
+      },
+      "x-go-package": "github.com/upmio/dbscale-kube/cluster_manager/apiserver/api"
+    },
+    "RemoteStorageConfig": {
+      "type": "object",
+      "properties": {
+        "API_version": {
+          "type": "string",
+          "x-go-name": "Version"
+        },
+        "auth": {
+          "$ref": "#/definitions/Auth"
+        },
+        "created_user": {
+          "type": "string",
+          "x-go-name": "User"
+        },
+        "desc": {
+          "type": "string",
+          "x-go-name": "Desc"
+        },
+        "enabled": {
+          "type": "boolean",
+          "x-go-name": "Enabled"
+        },
+        "model": {
+          "type": "string",
+          "x-go-name": "Model"
+        },
+        "name": {
+          "type": "string",
+          "x-go-name": "Name"
+        },
+        "site_id": {
+          "type": "string",
+          "x-go-name": "Site"
+        },
+        "type": {
+          "type": "string",
+          "x-go-name": "Type"
+        },
+        "vendor": {
+          "type": "string",
+          "x-go-name": "Vendor"
+        }
+      },
+      "x-go-package": "github.com/upmio/dbscale-kube/cluster_manager/apiserver/api"
+    },
+    "RemoteStorageOptions": {
+      "type": "object",
+      "properties": {
+        "auth": {
+          "type": "object",
+          "properties": {
+            "ip": {
+              "type": "string",
+              "x-go-name": "IP"
+            },
+            "password": {
+              "type": "string",
+              "x-go-name": "Password"
+            },
+            "port": {
+              "type": "integer",
+              "format": "int64",
+              "x-go-name": "Port"
+            },
+            "username": {
+              "type": "string",
+              "x-go-name": "User"
+            }
+          },
+          "x-go-name": "Auth"
+        },
+        "desc": {
+          "type": "string",
+          "x-go-name": "Desc"
+        },
+        "enabled": {
+          "type": "boolean",
+          "x-go-name": "Enabled"
+        },
+        "modified_user": {
+          "type": "string",
+          "x-go-name": "User"
+        },
+        "name": {
+          "type": "string",
+          "x-go-name": "Name"
+        }
+      },
+      "x-go-package": "github.com/upmio/dbscale-kube/cluster_manager/apiserver/api"
+    },
+    "RemoteStoragePool": {
+      "type": "object",
+      "properties": {
+        "capacity": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "Capacity"
+        },
+        "created": {
+          "$ref": "#/definitions/Editor"
+        },
+        "desc": {
+          "type": "string",
+          "x-go-name": "Desc"
+        },
+        "enabled": {
+          "type": "boolean",
+          "x-go-name": "Enabled"
+        },
+        "id": {
+          "type": "string",
+          "x-go-name": "ID"
+        },
+        "modified": {
+          "$ref": "#/definitions/Editor"
+        },
+        "name": {
+          "type": "string",
+          "x-go-name": "Name"
+        },
+        "native_id": {
+          "type": "string",
+          "x-go-name": "Native"
+        },
+        "performance": {
+          "$ref": "#/definitions/Performance"
+        },
+        "storage": {
+          "$ref": "#/definitions/IDName"
+        },
+        "task": {
+          "$ref": "#/definitions/TaskBrief"
+        },
+        "used": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "Used"
+        }
+      },
+      "x-go-package": "github.com/upmio/dbscale-kube/cluster_manager/apiserver/api"
+    },
+    "RemoteStoragePoolConfig": {
+      "type": "object",
+      "properties": {
+        "created_user": {
+          "type": "string",
+          "x-go-name": "User"
+        },
+        "desc": {
+          "type": "string",
+          "x-go-name": "Desc"
+        },
+        "enabled": {
+          "type": "boolean",
+          "x-go-name": "Enabled"
+        },
+        "name": {
+          "type": "string",
+          "x-go-name": "Name"
+        },
+        "native_id": {
+          "type": "string",
+          "x-go-name": "Native"
+        },
+        "performance": {
+          "$ref": "#/definitions/Performance"
+        },
+        "storage_id": {
+          "type": "string",
+          "x-go-name": "Storage"
+        }
+      },
+      "x-go-package": "github.com/upmio/dbscale-kube/cluster_manager/apiserver/api"
+    },
+    "RemoteStoragePoolOptions": {
+      "type": "object",
+      "properties": {
+        "desc": {
+          "type": "string",
+          "x-go-name": "Desc"
+        },
+        "enabled": {
+          "type": "boolean",
+          "x-go-name": "Enabled"
+        },
+        "modified_user": {
+          "type": "string",
+          "x-go-name": "User"
+        },
+        "name": {
+          "type": "string",
+          "x-go-name": "Name"
+        }
+      },
+      "x-go-package": "github.com/upmio/dbscale-kube/cluster_manager/apiserver/api"
+    },
+    "RemoteStoragePoolsResponse": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/RemoteStoragePool"
+      },
+      "x-go-package": "github.com/upmio/dbscale-kube/cluster_manager/apiserver/api"
+    },
+    "RemoteStoragesResponse": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/RemoteStorage"
+      },
+      "x-go-package": "github.com/upmio/dbscale-kube/cluster_manager/apiserver/api"
+    },
+    "Replication": {
+      "type": "object",
+      "properties": {
+        "last_io_error": {
+          "type": "string",
+          "x-go-name": "LastIOError"
+        },
+        "last_sql_error": {
+          "type": "string",
+          "x-go-name": "LastSqlError"
+        },
+        "master_ip": {
+          "type": "string",
+          "x-go-name": "MasterIP"
+        },
+        "master_log_file": {
+          "type": "string",
+          "x-go-name": "MasterLogFile"
+        },
+        "master_log_pos": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "MasterLogPos"
+        },
+        "master_port": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "MasterPort"
+        },
+        "relay_log_file": {
+          "type": "string",
+          "x-go-name": "RelayLogFile"
+        },
+        "relay_log_pos": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "RelayLogPos"
+        },
+        "relay_master_log_file": {
+          "type": "string",
+          "x-go-name": "RelayMasterLogFile"
+        },
+        "role": {
+          "type": "string",
+          "x-go-name": "Role"
+        },
+        "seconds_behind_master": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "SecondsBehindMaster"
+        },
+        "self_ip": {
+          "type": "string",
+          "x-go-name": "SelfIP"
+        },
+        "self_port": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "SelfPort"
+        },
+        "slave_io_running": {
+          "type": "string",
+          "x-go-name": "SlaveIORunning"
+        },
+        "slave_io_state": {
+          "type": "string",
+          "x-go-name": "SlaveIOState"
+        },
+        "slave_sql_running": {
+          "type": "string",
+          "x-go-name": "SlaveSqlRunning"
+        },
+        "slave_sql_running_state": {
+          "type": "string",
+          "x-go-name": "SlaveSqlRunningState"
+        }
+      },
+      "x-go-package": "github.com/upmio/dbscale-kube/cluster_manager/apiserver/api"
+    },
+    "ResourceRequirements": {
+      "type": "object",
+      "properties": {
+        "cpu": {
+          "type": "number",
+          "format": "float",
+          "x-go-name": "CPU"
+        },
+        "memory": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "Memory"
+        },
+        "net_bandwidth": {
+          "type": "integer",
+          "format": "int32",
+          "x-go-name": "Bandwidth"
+        },
+        "storage": {
+          "$ref": "#/definitions/StorageRequirement"
+        }
+      },
+      "x-go-package": "github.com/upmio/dbscale-kube/cluster_manager/apiserver/api"
+    },
+    "ResourceRequirementsOptions": {
+      "type": "object",
+      "properties": {
+        "cpu": {
+          "description": "require: false",
+          "type": "number",
+          "format": "float",
+          "x-go-name": "CPU"
+        },
+        "memory": {
+          "description": "require: false",
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "Memory"
+        },
+        "net_bandwidth": {
+          "description": "require: false",
+          "type": "integer",
+          "format": "int32",
+          "x-go-name": "Bandwidth"
+        },
+        "storage": {
+          "$ref": "#/definitions/StorageRequirement"
+        }
+      },
+      "x-go-package": "github.com/upmio/dbscale-kube/cluster_manager/apiserver/api"
+    },
+    "ResourceStatus": {
+      "type": "object",
+      "properties": {
+        "capacity": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "Capacity"
+        },
+        "used": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "Used"
+        }
+      },
+      "x-go-package": "github.com/upmio/dbscale-kube/cluster_manager/apiserver/api"
+    },
+    "Resources": {
+      "type": "object",
+      "properties": {
+        "requests": {
+          "$ref": "#/definitions/ResourceRequirements"
+        }
+      },
+      "x-go-package": "github.com/upmio/dbscale-kube/cluster_manager/apiserver/api"
+    },
+    "Route": {
+      "type": "object",
+      "properties": {
+        "end_ip": {
+          "$ref": "#/definitions/IP"
+        },
+        "gateway": {
+          "$ref": "#/definitions/IP"
+        },
+        "prefix": {
+          "description": "掩码",
+          "type": "integer",
+          "format": "int32",
+          "x-go-name": "Prefix"
+        },
+        "start_ip": {
+          "$ref": "#/definitions/IP"
+        },
+        "vlan": {
+          "description": "Vlan ID",
+          "type": "integer",
+          "format": "int32",
+          "x-go-name": "VLan"
+        }
+      },
+      "x-go-package": "github.com/upmio/dbscale-kube/cluster_manager/apiserver/api"
+    },
+    "Schema": {
+      "type": "object",
+      "properties": {
+        "character_set": {
+          "type": "string",
+          "x-go-name": "Character",
+          "example": "utf8mb4"
+        },
+        "name": {
+          "type": "string",
+          "x-go-name": "Name"
+        }
+      },
+      "x-go-package": "github.com/upmio/dbscale-kube/cluster_manager/apiserver/api"
+    },
+    "ServiceSpec": {
+      "type": "object",
+      "properties": {
+        "arch": {
+          "$ref": "#/definitions/Arch"
+        },
+        "backup": {
+          "$ref": "#/definitions/Backup"
+        },
+        "conditions": {
+          "$ref": "#/definitions/Conditions"
+        },
+        "num": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "Num"
+        },
+        "options": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          },
+          "x-go-name": "Options"
+        },
+        "ports": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ContainerPort"
+          },
+          "x-go-name": "Ports"
+        },
+        "units": {
+          "$ref": "#/definitions/UnitSpec"
+        }
+      },
+      "x-go-package": "github.com/upmio/dbscale-kube/cluster_manager/apiserver/api"
+    },
+    "Site": {
+      "type": "object",
+      "properties": {
+        "created": {
+          "$ref": "#/definitions/Editor"
+        },
+        "desc": {
+          "type": "string",
+          "x-go-name": "Desc"
+        },
+        "domain": {
+          "type": "string",
+          "x-go-name": "Domain"
+        },
+        "id": {
+          "type": "string",
+          "x-go-name": "ID"
+        },
+        "modified": {
+          "$ref": "#/definitions/Editor"
+        },
+        "name": {
+          "type": "string",
+          "x-go-name": "Name"
+        },
+        "port": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "Port"
+        },
+        "region": {
+          "type": "string",
+          "x-go-name": "Region",
+          "example": "SH"
+        },
+        "state": {
+          "type": "string",
+          "x-go-name": "State"
+        },
+        "type": {
+          "type": "string",
+          "x-go-name": "Type"
+        },
+        "version": {
+          "type": "string",
+          "x-go-name": "Version"
+        }
+      },
+      "x-go-package": "github.com/upmio/dbscale-kube/cluster_manager/apiserver/api"
+    },
+    "SiteConfig": {
+      "description": "SiteConfig",
+      "type": "object",
+      "properties": {
+        "created_user": {
+          "type": "string",
+          "x-go-name": "User"
+        },
+        "desc": {
+          "description": "描述",
+          "type": "string",
+          "x-go-name": "Desc"
+        },
+        "domain": {
+          "description": "连接域名",
+          "type": "string",
+          "x-go-name": "Domain",
+          "example": "project.dbscale.com"
+        },
+        "name": {
+          "description": "名称",
+          "type": "string",
+          "x-go-name": "Name"
+        },
+        "path": {
+          "type": "string",
+          "x-go-name": "Path"
+        },
+        "port": {
+          "description": "端口号",
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "Port",
+          "example": 6443
+        },
+        "region": {
+          "type": "string",
+          "x-go-name": "Region",
+          "example": "SH"
+        },
+        "type": {
+          "description": "类型",
+          "type": "string",
+          "enum": [
+            "kubernetes",
+            "swarm"
+          ],
+          "x-go-name": "Type"
+        }
+      },
+      "x-go-package": "github.com/upmio/dbscale-kube/cluster_manager/apiserver/api"
+    },
+    "SiteOptions": {
+      "type": "object",
+      "properties": {
+        "desc": {
+          "type": "string",
+          "x-go-name": "Desc"
+        },
+        "domain": {
+          "type": "string",
+          "x-go-name": "Domain",
+          "example": "project.dbscale.com"
+        },
+        "modified_user": {
+          "type": "string",
+          "x-go-name": "User"
+        },
+        "name": {
+          "type": "string",
+          "x-go-name": "Name",
+          "example": "test-site001"
+        },
+        "port": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "Port",
+          "example": 6443
+        },
+        "region": {
+          "type": "string",
+          "x-go-name": "Region",
+          "example": "SH"
+        }
+      },
+      "x-go-package": "github.com/upmio/dbscale-kube/cluster_manager/apiserver/api"
+    },
+    "SitesResponse": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/Site"
+      },
+      "x-go-package": "github.com/upmio/dbscale-kube/cluster_manager/apiserver/api"
+    },
+    "State": {
+      "type": "string",
+      "x-go-package": "github.com/upmio/dbscale-kube/cluster_manager/apiserver/api"
+    },
+    "StorageRequirement": {
+      "type": "object",
+      "properties": {
+        "performance": {
+          "$ref": "#/definitions/Performance"
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "remote",
+            "host"
+          ],
+          "x-go-name": "Type"
+        },
+        "volumes": {
+          "description": "require: true",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/VolumeRequirement"
+          },
+          "x-go-name": "Volumes"
+        }
+      },
+      "x-go-package": "github.com/upmio/dbscale-kube/cluster_manager/apiserver/api"
+    },
+    "Task": {
+      "type": "object",
+      "properties": {
+        "action": {
+          "type": "string",
+          "x-go-name": "Action"
+        },
+        "created_at": {
+          "$ref": "#/definitions/Time"
+        },
+        "created_user": {
+          "type": "string",
+          "x-go-name": "User"
+        },
+        "error": {
+          "type": "string",
+          "x-go-name": "Error"
+        },
+        "finished_at": {
+          "$ref": "#/definitions/Time"
+        },
+        "id": {
+          "type": "string",
+          "x-go-name": "ID"
+        },
+        "relate_id": {
+          "type": "string",
+          "x-go-name": "RelateID"
+        },
+        "status": {
+          "type": "string",
+          "x-go-name": "Status"
+        }
+      },
+      "x-go-package": "github.com/upmio/dbscale-kube/cluster_manager/apiserver/api"
+    },
+    "TaskBrief": {
+      "type": "object",
+      "properties": {
+        "action": {
+          "type": "string",
+          "x-go-name": "Action"
+        },
+        "id": {
+          "type": "string",
+          "x-go-name": "ID"
+        },
+        "status": {
+          "type": "string",
+          "x-go-name": "Status"
+        },
+        "user": {
+          "type": "string",
+          "x-go-name": "User"
+        }
+      },
+      "x-go-package": "github.com/upmio/dbscale-kube/cluster_manager/apiserver/api"
+    },
+    "TasksResponse": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/Task"
+      },
+      "x-go-package": "github.com/upmio/dbscale-kube/cluster_manager/apiserver/api"
+    },
+    "Time": {
+      "type": "string",
+      "format": "date-time",
+      "x-go-package": "github.com/upmio/dbscale-kube/cluster_manager/apiserver/api"
+    },
+    "UnitBrief": {
+      "type": "object",
+      "properties": {
+        "cpu": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "CPU"
+        },
+        "id": {
+          "type": "string",
+          "x-go-name": "ID"
+        },
+        "mem": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "Memory"
+        },
+        "name": {
+          "type": "string",
+          "x-go-name": "Name"
+        },
+        "net_bandwidth": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "NetBandwidth"
+        },
+        "state": {
+          "type": "string",
+          "x-go-name": "State"
+        },
+        "type": {
+          "type": "string",
+          "x-go-name": "Type"
+        }
+      },
+      "x-go-package": "github.com/upmio/dbscale-kube/cluster_manager/apiserver/api"
+    },
+    "UnitInfo": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "x-go-name": "ID"
+        },
+        "image": {
+          "$ref": "#/definitions/ImageVersion"
+        },
+        "ip": {
+          "$ref": "#/definitions/IP"
+        },
+        "namespace": {
+          "type": "string",
+          "x-go-name": "Namespace"
+        },
+        "node": {
+          "$ref": "#/definitions/NodeBrief"
+        },
+        "pod_state": {
+          "type": "string",
+          "x-go-name": "PodState"
+        },
+        "replication": {
+          "$ref": "#/definitions/Replication"
+        },
+        "resources": {
+          "$ref": "#/definitions/ResourceRequirements"
+        },
+        "start_at": {
+          "$ref": "#/definitions/Time"
+        },
+        "state": {
+          "$ref": "#/definitions/State"
+        }
+      },
+      "x-go-package": "github.com/upmio/dbscale-kube/cluster_manager/apiserver/api"
+    },
+    "UnitRebuildOptions": {
+      "type": "object",
+      "properties": {
+        "image": {
+          "description": "require: false",
+          "type": "string",
+          "x-go-name": "Image"
+        },
+        "node": {
+          "description": "require: false",
+          "type": "string",
+          "x-go-name": "Node"
+        },
+        "resources": {
+          "$ref": "#/definitions/ResourceRequirementsOptions"
+        }
+      },
+      "x-go-package": "github.com/upmio/dbscale-kube/cluster_manager/apiserver/api"
+    },
+    "UnitRecoveryOptions": {
+      "type": "object",
+      "properties": {
+        "backup_file_id": {
+          "description": "require: true",
+          "type": "string",
+          "x-go-name": "File"
+        }
+      },
+      "x-go-package": "github.com/upmio/dbscale-kube/cluster_manager/apiserver/api"
+    },
+    "UnitSpec": {
+      "type": "object",
+      "properties": {
+        "readiness_state": {
+          "$ref": "#/definitions/State"
+        },
+        "resources": {
+          "$ref": "#/definitions/Resources"
+        }
+      },
+      "x-go-package": "github.com/upmio/dbscale-kube/cluster_manager/apiserver/api"
+    },
+    "VolumeRequirement": {
+      "type": "object",
+      "properties": {
+        "capacity": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "Capacity"
+        },
+        "type": {
+          "type": "string",
+          "x-go-name": "Type"
+        }
+      },
+      "x-go-package": "github.com/upmio/dbscale-kube/cluster_manager/apiserver/api"
+    }
+  },
+  "responses": {
+    "ErrorResponse": {
+      "description": "ErrorResponse\nerror common response",
+      "headers": {
+        "code": {
+          "type": "integer",
+          "format": "int64",
+          "description": "错误代码"
+        },
+        "msg": {
+          "type": "string",
+          "description": "错误信息"
+        }
+      }
+    },
+    "ObjectResponse": {
+      "description": "ObjectResponse response object id and name",
+      "headers": {
+        "id": {
+          "type": "string",
+          "description": "对象名称"
+        },
+        "name": {
+          "type": "string",
+          "description": "对象名称"
+        }
+      }
+    },
+    "TaskObjectResponse": {
+      "description": "TaskObjectResponse response task ID with object's id and name",
+      "headers": {
+        "id": {
+          "type": "string",
+          "description": "对象名称"
+        },
+        "name": {
+          "type": "string",
+          "description": "对象名称"
+        },
+        "task_id": {
+          "type": "string",
+          "description": "任务 ID"
+        }
+      }
+    },
+    "TaskResponse": {
+      "description": "TaskResponse response task ID",
+      "headers": {
+        "taskID": {
+          "type": "string",
+          "description": "任务 ID"
+        }
+      }
+    },
+    "listAppDBSchemaDetailResponseWrapper": {
+      "description": "list App DB Schema detail",
+      "schema": {
+        "$ref": "#/definitions/DBSchemaDetailResponse"
+      }
+    },
+    "listAppDBSchemaResponseWrapper": {
+      "description": "list App DB Schema",
+      "schema": {
+        "$ref": "#/definitions/DBSchemaResponse"
+      }
+    },
+    "listAppDBUserResponseWrapper": {
+      "description": "list App DB User",
+      "schema": {
+        "$ref": "#/definitions/AppUsersResponse"
+      }
+    },
+    "listAppsResponseWrapper": {
+      "description": "list Apps info",
+      "schema": {
+        "$ref": "#/definitions/AppsResponse"
+      }
+    },
+    "listBackupFilesResponseWrapper": {
+      "description": "list Apps info",
+      "schema": {
+        "$ref": "#/definitions/BackupFilesResponse"
+      }
+    },
+    "listBackupStrategyResponseWrapper": {
+      "description": "list backup strage info",
+      "schema": {
+        "$ref": "#/definitions/BackupStrategyResponse"
+      }
+    },
+    "listClusterResponseWrapper": {
+      "description": "list clusters info",
+      "schema": {
+        "$ref": "#/definitions/ClustersResponse"
+      }
+    },
+    "listHostResponseWrapper": {
+      "description": "list hosts info",
+      "schema": {
+        "$ref": "#/definitions/HostsResponse"
+      }
+    },
+    "listImageTemplatesResponseWrapper": {
+      "description": "list image templates info",
+      "schema": {
+        "$ref": "#/definitions/ImageTemplatesResponse"
+      }
+    },
+    "listImagesResponseWrapper": {
+      "description": "list images info",
+      "schema": {
+        "$ref": "#/definitions/ImagesResponse"
+      }
+    },
+    "listNetworksResponseWrapper": {
+      "description": "list object info",
+      "schema": {
+        "$ref": "#/definitions/NetworksResponse"
+      }
+    },
+    "listRemoteStoragePoolsResponseWrapper": {
+      "description": "list RemoteStorage pools info",
+      "schema": {
+        "$ref": "#/definitions/RemoteStoragePoolsResponse"
+      }
+    },
+    "listRemoteStoragesResponseWrapper": {
+      "description": "list RemoteStorages info",
+      "schema": {
+        "$ref": "#/definitions/RemoteStoragesResponse"
+      }
+    },
+    "listSitesResponseWrapper": {
+      "description": "list sites info",
+      "schema": {
+        "$ref": "#/definitions/SitesResponse"
+      }
+    },
+    "listTasksResponseWrapper": {
+      "description": "list tasks info",
+      "schema": {
+        "$ref": "#/definitions/TasksResponse"
+      }
+    }
+  }
+}

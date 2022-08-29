@@ -1,0 +1,8 @@
+/var/log/cluster_agent/cluster_agent.log {
+    weekly
+    rotate {{ rotate_times }}
+    missingok
+    notifempty
+    size {{ log_size }}
+    create 0644 root root
+}

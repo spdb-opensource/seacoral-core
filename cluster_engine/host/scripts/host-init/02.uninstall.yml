@@ -1,0 +1,31 @@
+- name: 主机出库
+  hosts: all
+  tasks:
+    - name: 检查原本的 cni 配置目录是否存在
+      stat:
+        path: /etc/cni/net.d.origin
+      register: origin
+    - block:
+      - name: 删除 sriov-plugin cni 配置目录
+        file: path=/etc/cni/net.d state=absent
+      - name: 拷贝回原本的 cni 配置目录
+        copy: src=/etc/cni/net.d.origin/ dest=/etc/cni/net.d remote_src=yes
+      when: origin.stat.exists and (network_mode == "sriov" or network_mode == "macvlan")
+    - name: 停止 cluster_agent.service
+      service: name=cluster_agent.service state=stopped enabled=no daemon_reload=yes
+      ignore_errors: true
+    - name: 删除 cluster_agent systemd file
+      file: path=/etc/systemd/system/cluster_agent.service state=absent
+    - name: 删除 cluster_agent 目录和文件
+      file: path={{ ca_home_dir }} state=absent
+    - name: 删除 netdev-plugin
+      file: path=/opt/cni/netdev-plugin state=absent
+    - name: 删除 cluster_agent kubeconfig文件
+      file: path=/etc/kubernetes/cluster_agent.conf state=absent
+    - name: 删除 vg
+      lvg: vg={{ item.vg_name }} pvs={{ item.dev_list }} state=absent force=yes
+      with_items: "{{ vgs }}"
+    - name: 清楚 clean memory cache cron 策略
+      cron:
+        name: clean memory cache
+        state: absent

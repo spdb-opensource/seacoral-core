@@ -1,0 +1,436 @@
+#!/usr/bin/env bash
+
+set -o nounset
+# ##############################################################################
+# Globals, settings
+# ##############################################################################
+POSIXLY_CORRECT=1
+export POSIXLY_CORRECT
+LANG=C
+
+FILE_NAME="host-init"
+VERSION="1.0.4"
+
+BASE_DIR="$( dirname "$( readlink -f "$0" )" )"
+LOG_MOUNT="${BASE_DIR}/log"
+FILE_LOG_FILE="${LOG_MOUNT}/${FILE_NAME}.log"
+
+# ##############################################################################
+# common function package
+# ##############################################################################
+die () {
+    local status="${1}"
+    shift
+    local function_name="${1}"
+    shift
+    error "${function_name}" "$*"
+    exit "$status"
+}
+
+error () {
+    local function_name="${1}"
+    shift
+    local timestamp
+    timestamp="$( date +"%Y-%m-%d %T %N" )"
+    echo "[${timestamp}] ERR  [${function_name}]: $* ;" | tee -a "${FILE_LOG_FILE}"
+}
+
+info () {
+    local function_name="${1}"
+    shift
+    local timestamp
+    timestamp="$( date +"%Y-%m-%d %T %N" )"
+    echo "[${timestamp}] INFO [${function_name}]: $* ;" | tee -a "${FILE_LOG_FILE}"
+}
+
+installed () {
+    command -v "$1" >/dev/null 2>&1
+}
+
+check_value_is_exist () {
+    local key="${1}"
+    local input="${2}"
+    local output
+
+    output="$( jq --raw-output -c "${key}" 2> /dev/null <<< "${input}" )"
+
+    [[ "${output}" != "null" ]] || return 2
+}
+
+get_value_not_null () {
+    local func_name="${FILE_NAME}.get_value_not_null"
+
+    local key="${1}"
+    local input="${2}"
+
+    local output
+
+    check_value_is_exist "${key}" "${input}" || {
+        error "${func_name}" "check value is not exist"
+        return 2
+    }
+
+    output="$( jq --raw-output -c "${key}" <<< "${input}" 2> /dev/null )"
+
+    [[ -n "${output}" ]] || {
+        error "${func_name}" "the length of value is zero"
+        error "${func_name}" "input: [ ${input} ]"
+        return 2
+    }
+
+    [[ "${output}" != "null" ]] || {
+        error "${func_name}" "value equal to \"null\""
+        return 2
+    }
+
+    echo "${output}"
+}
+# ##############################################################################
+# check port function
+# ##############################################################################
+init_check_port () {
+    local func_name="${FILE_NAME}.check_port"
+    exit 0
+}
+# ##############################################################################
+# check storage action function
+# ##############################################################################
+init_check_storage () {
+    local func_name="${FILE_NAME}.check_storage"
+    local random="$RANDOM"
+    local func_flag="${func_name}(${random})"
+
+    installed jq || die 41 "${func_flag}" "Not install jq"
+    installed ansible-playbook || die 41 "${func_flag}" "Not find ansible-playbook"
+
+    local host_ip
+    host_ip="$( get_value_not_null ".host_ip" "${input}" )" || {
+        die 42 "${func_flag}" "get .host_ip failed!"
+    }
+
+    info "${func_flag}" "Starting run ${func_name}(${host_ip}) !"
+
+    info "${func_flag}" "ansible playbook running!"
+    LANG="zh_CN.UTF-8"
+    ansible-playbook --inventory="${host_ip}", "${BASE_DIR}/12.check_storage.yml" --extra-vars "${input}" || {
+        LANG=C
+        die 48 "${func_flag}" "ansible playbook failed!"
+    }
+    LANG=C
+    info "${func_flag}" "ansible playbook done!"
+
+    info "${func_flag}" "run ${func_name}(${host_ip}) done !"
+
+}
+# ##############################################################################
+# check io action function
+# ##############################################################################
+init_check_io () {
+    local func_name="${FILE_NAME}.check_io"
+    local random="$RANDOM"
+    local func_flag="${func_name}(${random})"
+
+    installed jq || die 41 "${func_flag}" "Not install jq"
+    installed ansible-playbook || die 41 "${func_flag}" "Not find ansible-playbook"
+
+    local host_ip
+    host_ip="$( get_value_not_null ".host_ip" "${input}" )" || {
+        die 42 "${func_flag}" "get .host_ip failed!"
+    }
+
+    local phare
+    phare="$( /opt/kubectl get host "${host_ip}" -o=jsonpath='{..status.phase}' --kubeconfig=/etc/kubernetes/cluster_engine.conf )"
+    if [[ ${phare} != "ready" ]]; then
+        info "${func_flag}" "Starting run ${func_name}(${host_ip}) !"
+
+        info "${func_flag}" "ansible playbook running!"
+        LANG="zh_CN.UTF-8"
+        ansible-playbook --inventory="${host_ip}", "${BASE_DIR}/14.check_io.yml" --extra-vars "${input}" || {
+            LANG=C
+            die 48 "${func_flag}" "ansible playbook failed!"
+        }
+        LANG=C
+        info "${func_flag}" "ansible playbook done!"
+
+        info "${func_flag}" "run ${func_name}(${host_ip}) done !"
+    else
+        die 49 "${func_flag}" "Host ${host_ip} has been installed! Can't do io check!"
+    fi
+}
+# ##############################################################################
+# check network action function
+# ##############################################################################
+init_check_network () {
+    local func_name="${FILE_NAME}.check_network"
+    local random="$RANDOM"
+    local func_flag="${func_name}(${random})"
+
+    installed jq || die 41 "${func_flag}" "Not install jq"
+    installed ansible-playbook || die 41 "${func_flag}" "Not find ansible-playbook"
+
+    local host_ip
+    host_ip="$( get_value_not_null ".host_ip" "${input}" )" || {
+        die 42 "${func_flag}" "get .host_ip failed!"
+    }
+
+    local phare
+    phare="$( /opt/kubectl get host "${host_ip}" -o=jsonpath='{..status.phase}' --kubeconfig=/etc/kubernetes/cluster_engine.conf )"
+    if [[ ${phare} == "ready" ]]; then
+        local host_max_unit
+        host_max_unit="$( /opt/kubectl get node "${host_ip}" -o=jsonpath='{..metadata.annotations.upm\.host\.maxunit}' --kubeconfig=/etc/kubernetes/cluster_engine.conf )" || {
+            die 43 "${func_flag}" "get host_max_unit failed!"
+        }
+        local max_unit
+        max_unit="$( get_value_not_null ".max_unit" "${input}" )" || {
+            die 44 "${func_flag}" "get .max_unit failed!"
+        }
+
+        if [[ ${max_unit} -gt ${host_max_unit} ]]; then
+            die 45 "${func_flag}" "max_unit ${max_unit} > ${host_max_unit}!"
+        fi
+    else
+        info "${func_flag}" "Starting run ${func_name}(${host_ip}) !"
+
+        info "${func_flag}" "ansible playbook running!"
+        LANG="zh_CN.UTF-8"
+        ansible-playbook --inventory="${host_ip}", "${BASE_DIR}/13.check_network.yml" --extra-vars "${input}" || {
+            LANG=C
+            die 46 "${func_flag}" "ansible playbook failed!"
+        }
+        LANG=C
+        info "${func_flag}" "ansible playbook done!"
+
+        info "${func_flag}" "run ${func_name}(${host_ip}) done !"
+    fi
+
+}
+# ##############################################################################
+# install action function
+# ##############################################################################
+init_install () {
+    local func_name="${FILE_NAME}.install"
+    local random="$RANDOM"
+    local func_flag="${func_name}(${random})"
+
+    local input="${1}"
+
+    installed jq || die 41 "${func_flag}" "Not install jq"
+    installed ansible-playbook || die 41 "${func_flag}" "Not find ansible-playbook"
+
+    local host_ip
+    host_ip="$( get_value_not_null ".host_ip" "${input}" )" || {
+        die 42 "${func_flag}" "get .host_ip failed!"
+    }
+
+    installed /opt/kubectl || die 43 "${func_flag}" "Not find /opt/kubectl"
+
+    # make sure the lockfile is removed when we exit and then claim it
+    local run_lockfile="/tmp/.${func_name}-${host_ip}.lock"
+    trap 'rm -f '"${run_lockfile}"'; exit' INT TERM EXIT
+
+    [[ ! -f "${run_lockfile}" ]] || {
+        die 44 "${func_flag}" "multiple run ${func_name}(${host_ip}) !"
+    }
+
+    date +"%Y-%m-%d %T %N" > "${run_lockfile}"
+    echo "${random}" > "${run_lockfile}"
+
+    info "${func_flag}" "Starting run ${func_name}(${host_ip}) !"
+    # check run lock file
+    grep -w "^${random}$" "${run_lockfile}" &> /dev/null || die 46 "${func_flag}" "check run lock file failed!"
+
+    info "${func_flag}" "ansible playbook running!"
+    LANG="zh_CN.UTF-8"
+    ansible-playbook --inventory="${host_ip}", "${BASE_DIR}/01.install.yml" --extra-vars "${input}" || {
+        LANG=C
+        die 48 "${func_flag}" "ansible playbook failed!"
+    }
+    LANG=C
+    info "${func_flag}" "ansible playbook done!"
+
+    rm -f "${run_lockfile}"
+    info "${func_flag}" "run ${func_name}(${host_ip}) done !"
+}
+
+# ##############################################################################
+# uninstall action function
+# ##############################################################################
+init_uninstall () {
+    local func_name="${FILE_NAME}.uninstall"
+    local random="$RANDOM"
+    local func_flag="${func_name}(${random})"
+
+    local input="${1}"
+
+    installed jq || die 41 "${func_flag}" "Not install jq"
+    installed ansible-playbook || die 41 "${func_flag}" "Not find ansible-playbook"
+
+    local host_ip
+    host_ip="$( get_value_not_null ".host_ip" "${input}" )" || {
+        die 42 "${func_flag}" "get .host_ip failed!"
+    }
+
+    # make sure the lockfile is removed when we exit and then claim it
+    local run_lockfile="/tmp/.${func_name}-${host_ip}.lock"
+    trap 'rm -f '"${run_lockfile}"'; exit' INT TERM EXIT
+
+    installed /opt/kubectl || die 43 "${func_flag}" "Not find /opt/kubectl"
+
+    [[ ! -f "${run_lockfile}" ]] || {
+        die 44 "${func_flag}" "multiple run ${func_name}(${host_ip}) !"
+    }
+
+    date +"%Y-%m-%d %T %N" > "${run_lockfile}"
+    echo "${random}" > "${run_lockfile}"
+
+    info "${func_flag}" "Starting run ${func_name}(${host_ip}) !"
+    # check run lock file
+    grep -w "^${random}$" "${run_lockfile}" &> /dev/null || die 46 "${func_flag}" "check run lock file failed!"
+
+    info "${func_flag}" "ansible playbook running!"
+    LANG="zh_CN.UTF-8"
+    ansible-playbook --inventory="${host_ip}", "${BASE_DIR}/02.uninstall.yml" --extra-vars "${input}" || {
+        LANG=C
+        die 48 "${func_flag}" "ansible playbook failed!"
+    }
+    LANG=C
+    info "${func_flag}" "ansible playbook done!"
+
+    rm -f "${run_lockfile}"
+    info "${func_flag}" "run ${func_name}(${host_ip}) done !"
+}
+
+# ##############################################################################
+# The main() function is called at the action function.
+# ##############################################################################
+main () {
+    local func_name="${FILE_NAME}.main"
+    local action="${1}"
+    local input="${2}"
+
+    case "${action}" in
+        "check_port")
+            init_check_port "${input}"
+            ;;
+        "check_io")
+            init_check_io "${input}"
+            ;;
+        "check_storage")
+            init_check_storage "${input}"
+            ;;
+        "check_network")
+            init_check_network "${input}"
+            ;;
+        "install")
+            init_install "${input}"
+            ;;
+        "uninstall")
+            init_uninstall "${input}"
+            ;;
+        "version" )
+            echo "${VERSION}"
+            exit 0
+            ;;
+        *)
+            die 26 "${func_name}" "action(${action}) nonsupport"
+            ;;
+    esac
+}
+
+main "${@:-""}"
+
+# ##############################################################################
+# Documentation
+# ##############################################################################
+:<<'DOCUMENTATION'
+================================================================================
+check_port
+input json example:
+{
+  "ssh_user": "*****",
+  "ssh_password": "*****",
+  "ssh_port": 22,
+  "host_ip": "192.168.26.61",
+  "host_name": "192.168.26.61",
+  "max_unit": 10,
+  "vgs": [
+    {
+      "dev_list": "/dev/sdb",
+      "vg_name": "local_medium_VG"
+    }
+  ]
+}
+
+================================================================================
+check_storage
+input json example:
+{
+  "ssh_user": "*****",
+  "ssh_password": "*****",
+  "ssh_port": 22,
+  "host_ip": "192.168.26.61",
+  "host_name": "192.168.26.61",
+  "max_unit": 10,
+  "vgs": [
+    {
+      "dev_list": "/dev/sdb",
+      "vg_name": "local_medium_VG"
+    }
+  ]
+}
+
+================================================================================
+check_network
+input json example:
+{
+  "ssh_user": "*****",
+  "ssh_password": "*****",
+  "ssh_port": 22,
+  "host_ip": "192.168.26.61",
+  "host_name": "192.168.26.61",
+  "max_unit": 10,
+  "vgs": [
+    {
+      "dev_list": "/dev/sdb",
+      "vg_name": "local_medium_VG"
+    }
+  ]
+}
+
+================================================================================
+install
+input json example:
+{
+  "ssh_user": "*****",
+  "ssh_password": "*****",
+  "ssh_port": 22,
+  "host_ip": "192.168.26.61",
+  "host_name": "192.168.26.61",
+  "max_unit": 10,
+  "vgs": [
+    {
+      "dev_list": "/dev/sdb",
+      "vg_name": "local_medium_VG"
+    }
+  ]
+}
+
+================================================================================
+uninstall
+input json example:
+{
+  "ssh_user": "*****",
+  "ssh_password": "*****",
+  "ssh_port": 22,
+  "host_ip": "192.168.26.61",
+  "host_name": "192.168.26.61",
+  "max_unit": 10,
+  "vgs": [
+    {
+      "dev_list": "/dev/sdb",
+      "vg_name": "local_medium_VG"
+    }
+  ]
+}
+
+DOCUMENTATION

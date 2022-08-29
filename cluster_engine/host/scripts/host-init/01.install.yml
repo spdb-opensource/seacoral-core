@@ -1,0 +1,9 @@
+- name: 安装 cluster_agent
+  hosts: all
+  roles:
+    - cluster_agent
+
+- name: 日志配置
+  hosts: all
+  roles:
+    - log

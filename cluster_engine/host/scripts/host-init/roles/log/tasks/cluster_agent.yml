@@ -1,0 +1,38 @@
+- name: 创建 cluster_agent.service.d 目录
+  file:
+    name: '/etc/systemd/system/cluster_agent.service.d'
+    state: directory
+    owner: 'root'
+    group: 'root'
+    mode: 0755
+
+- name: 创建 cluster_agent syslogidentifer 文件
+  template:
+    src: 'cluster_agent/syslogidentifer.conf.j2'
+    dest: '/etc/systemd/system/cluster_agent.service.d/syslogidentifer.conf'
+    owner: 'root'
+    group: 'root'
+    mode: 0644
+  notify:
+  - reload systemd
+  - restart rsyslog
+
+- name: 创建 rsyslog cluster_agent.conf 文件
+  template:
+    src: 'cluster_agent/rsyslog.conf.j2'
+    dest: '/etc/rsyslog.d/cluster_agent.conf'
+    owner: 'root'
+    group: 'root'
+    mode: 0644
+  notify:
+  - reload systemd
+  - restart rsyslog
+
+- name: 创建 logrotate cluster_agent 文件
+  template:
+    src: 'cluster_agent/logrotate.j2'
+    dest: '/etc/logrotate.d/cluster_agent'
+    owner: 'root'
+    group: 'root'
+    mode: 0644
+  notify: reload cluster_agent logrotate

@@ -1,0 +1,11 @@
+- name: restart rsyslog
+  service:
+    name: rsyslog
+    state: restarted
+
+- name: reload systemd
+  systemd:
+    daemon-reload: yes
+
+- name: reload cluster_agent logrotate
+  shell: '/usr/sbin/logrotate -f /etc/logrotate.d/cluster_agent'

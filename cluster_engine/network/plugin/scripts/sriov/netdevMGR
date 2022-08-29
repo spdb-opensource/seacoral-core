@@ -1,0 +1,490 @@
+#!/usr/bin/env bash
+
+# This program is part of DBScale.
+
+set -o nounset
+# ##############################################################################
+# Globals, settings
+# ##############################################################################
+POSIXLY_CORRECT=1
+export POSIXLY_CORRECT
+LANG=C
+
+VERSION="1.0.1"
+FILE_NAME="sriovMGR"
+
+# ##############################################################################
+# common function package
+# ##############################################################################
+die () {
+    local status="${1}"
+    shift
+    local function_name="${1}"
+    shift
+    error "${function_name}" "$*"
+    exit "$status"
+}
+
+error () {
+    local function_name="${1}"
+    shift
+    echo "ERR[${function_name}]: $* ;"
+}
+
+installed () {
+    command -v "$1" >/dev/null 2>&1
+}
+
+check_value_is_exist () {
+    local key="${1}"
+    local input="${2}"
+    local output
+
+    output="$(jq --raw-output -c "${key}" 2> /dev/null <<< "${input}")"
+
+    if [[ "${output}" == "null" ]];then
+        return 2
+    fi
+}
+
+add_field () {
+    local func_name="${FILE_NAME}.add_field"
+
+    local value_type="${1}"
+    local key="${2}"
+    local value="${3}"
+    local input="${4}"
+
+    case "${value_type}" in
+        "json_string")
+            jq  ". +{\"${key}\": ${value}}" <<< "${input}"
+            ;;
+        "string")
+            jq  ". +{\"${key}\": \"${value}\"}" <<< "${input}"
+            ;;
+        "int64")
+            jq  ". +{\"${key}\": ${value}}" <<< "${input}"
+            ;;
+        "float64")
+            # check int,if value is int , convert type to float64
+            [[ "${value}" =~ ^[0-9]*$ ]] && value="${value}.0"
+
+            jq  ". +{\"${key}\": ${value}}" <<< "${input}" 2> /dev/null
+            ;;
+        *)
+            error "${func_name}" "value_type nonsupport"
+            return 2
+            ;;
+    esac
+}
+
+get_value_not_null () {
+    local func_name="${FILE_NAME}.get_value_not_null"
+
+    local key="${1}"
+    local input="${2}"
+
+    local output
+
+    check_value_is_exist "${key}" "${input}" || {
+        error "${func_name}" "check value is not exist"
+        return 2
+    }
+
+    output="$( jq --raw-output -c "${key}" <<< "${input}" )"
+
+    [[ -z "${output}" ]] && {
+        error "${func_name}" "the length of value is zero"
+        return 2
+    }
+
+    [[ "${output}" == "null" ]] && {
+        error "${func_name}" "value equal to \"null\""
+        return 2
+    }
+
+    echo "${output}"
+}
+
+get_value () {
+    local func_name="${FILE_NAME}.get_value_not_null"
+
+    local key="${1}"
+    local input="${2}"
+
+    local output
+
+    check_value_is_exist "${key}" "${input}" || {
+        error "${func_name}" "check value is not exist"
+        return 2
+    }
+
+    output="$( jq --raw-output -c "${key}" <<< "${input}" )"
+
+    echo "${output}"
+}
+
+check_interface_up(){
+    local func_name="${FILE_NAME}.check_interface_up"
+
+    local device="$1"
+    ip link set dev "${device}" down
+    sleep 2
+    ip link set dev "${device}" up
+    if [[ "$( cat /sys/class/net/"${device}"/operstate )" != "up" ]]; then
+        error "${func_name}" "up ${device} failed"
+        return 2
+    fi
+}
+
+get_interface_type(){
+    local func_name="${FILE_NAME}.get_interface_type"
+
+    local nic_dir="/sys/class/net"
+    local device="${1}"
+    local if_type=''
+    # determine type of first argument (bridge, physical interface...),
+    if [[ -d "${nic_dir}/${device}" ]]; then
+        if [[ -d "${nic_dir}/${device}/bridge" ]]; then
+            error "${func_name}" "unsupported for Linux bridge."
+            return 2
+        elif installed ovs-vsctl && ovs-vsctl list-br|grep -q "^${device}$"; then
+            error "${func_name}" "unsupported for ovs."
+            return 2
+        elif [[ "$(cat "${nic_dir}/${device}/type")" -eq 32 ]]; then # Infiniband IPoIB interface type 32
+            error "${func_name}" "unsupported for IPoIB."
+            return 2
+        elif [[ -d "${nic_dir}/${device}/bonding" ]]; then
+            if_type="bond"
+        elif [[ -d "${nic_dir}/${device}/device/physfn" ]]; then
+            output="phys-sriov"
+        else
+            if_type="phys"
+        fi
+    else
+        error "${func_name}" "I do not know how to setup interface ${device}."
+        return 2
+    fi
+    echo "${if_type}"
+}
+
+set_bandwidth(){
+    local func_name="${FILE_NAME}.set_bandwidth"
+
+    local device="${1}"
+    local bandwith="${2}"
+    if [[ "${bandwith}" -gt 0 ]];then
+        local pf_name
+        # shellcheck disable=SC2012
+        pf_name="$( ls /sys/class/net/"${device}"/device/physfn/net/ 2> /dev/null | tr -d "\\n" )"
+        if [[ -n "${pf_name}" ]]; then
+            local vf_num
+            vf_num="$( ip link show "${pf_name}" | awk -v mac="$(cat /sys/class/net/"${device}"/address)" '$0 ~ mac{print $2}' )"
+            ip link set "${pf_name}" vf "${vf_num}" rate "${bandwith}" || {
+                error "${func_name}" "Set ${device} bandwidth failed"
+                return 2
+            }
+        fi
+    fi
+}
+
+get_guest_ifname(){
+    local func_name="${FILE_NAME}.get_guest_ifname"
+
+    local device="${1}"
+    local vlan="${2}"
+
+    if [[ "${vlan}" -ne 0 ]]; then
+        guest_ifname=${device}.${vlan}
+    else
+        guest_ifname=${device}
+    fi
+
+    echo "${guest_ifname}"
+}
+
+# ##############################################################################
+# network manager action function
+# action function can use function( die ) and exit
+# ##############################################################################
+network_add () {
+    local func_name="${FILE_NAME}.network_add"
+
+    local input="${1}"
+
+    local kube_dev_name
+    local network_namespace
+    kube_dev_name="$( get_value_not_null ".kube_dev_name" "${input}" )" || {
+        die 41 "${func_name}" "get .kube_dev_name failed!"
+    }
+
+    network_namespace="$( get_value_not_null ".network_namespace" "${input}" )" || {
+        die 42 "${func_name}" "get .network_namespace failed!"
+    }
+
+    local i=0
+    while true; do
+        if check_value_is_exist ".network_devices[$i]" "${input}" &> /dev/null; then
+            local host_ifname
+            local ip_addr
+            local prefix
+            local gateway
+            local nspid
+            local vlan
+            local bandwidth
+            local network_type
+            local container_ifname
+            local if_type
+            local guest_ifname
+
+            host_ifname="$( get_value_not_null ".network_devices[${i}].native_dev" "${input}" )" || {
+                die 43 "${func_name}" "get .network_devices[${i}].native_dev failed!"
+            }
+            ip_addr="$( get_value_not_null ".network_devices[${i}].ip_address" "${input}" )" || {
+                die 44 "${func_name}" "get .network_devices[${i}].ip_address failed!"
+            }
+            prefix="$( get_value_not_null ".network_devices[${i}].prefix" "${input}" )" || {
+                die 45 "${func_name}" "get .network_devices[${i}].prefix failed!"
+            }
+            gateway="$( get_value_not_null ".network_devices[${i}].gateway" "${input}" )" || {
+                die 46 "${func_name}" "get .network_devices[${i}].gateway failed!"
+            }
+            nspid="$( awk -F/ '{print $3}' <<< "${network_namespace}" )"
+            test -z "${nspid}" && {
+                die 47 "${func_name}" "get nspid failed!"
+            }
+            # if vlan is 0 meaning no set vlan
+            vlan="$( get_value_not_null ".network_devices[${i}].vlan_id" "${input}" )" || {
+                die 48 "${func_name}" "get .network_devices[${i}].vlan_id failed!"
+            }
+            #if bandwith is 0, not set limit
+            bandwidth="$( get_value ".network_devices[$i].bandwidth_Mb" "${input}" )"
+            # if bandwith has no value, bandwidth will be 0
+            bandwidth="${bandwidth:-0}"
+            network_type="$( get_value ".network_devices[$i].network_type" "${input}" )"
+            # if network_type has no value, network_type will be internal
+            network_type="${network_type:-internal}"
+            case ${network_type} in
+                "internal")
+                    container_ifname="${kube_dev_name}"
+                    ;;
+                "external")
+                    container_ifname="net0"
+                    ;;
+                *)
+                    die 49 "${func_name}" "NETWORK_TYPE ${network_type} unsupported!"
+                    ;;
+            esac
+
+            check_interface_up "${host_ifname}" || {
+                die 50 "${func_name}" "check_interface_up failed!"
+            }
+
+            # only support "bond", "phys", "phys-sriov"
+            if_type="$( get_interface_type "${host_ifname}" )" || {
+                die 51 "${func_name}" "get_interface_type failed!"
+            }
+
+            # set bandwidth
+            if [[ "${if_type}" == "bond" ]]; then
+                if [[ ${vlan} -eq 0 ]]; then
+                    die 52 "${func_name}" "interface (${host_ifname}) type is bond, VLAN ID must be set (vlan id > 0) !"
+                else
+                    # If it's a bond interface, create a vlan subinterface
+                    local mtu
+                    mtu="$( ip link show "${host_ifname}" | awk '{print $5}' )"
+                    [[ ! -d "/sys/class/net/${host_ifname}.${vlan}" ]] && {
+                        ip link add link "${host_ifname}" name "${host_ifname}.${vlan}" mtu "${mtu}" type vlan id "${vlan}" || {
+                            die 53 "${func_name}" "create ${host_ifname}.VLAN failed"
+                        }
+                    }
+                    ip link set "${host_ifname}" up || {
+                        die 54 "${func_name}" "${host_ifname}.VLAN up failed"
+                    }
+                fi
+
+                local slaves
+                slaves="$( grep -v '^ *#' < "/sys/class/net/${host_ifname}/bonding/slaves" )"
+                for slave_dev in ${slaves}; do
+                    check_interface_up "${slave_dev}"
+                    set_bandwidth "${slave_dev}" "${bandwidth}"
+                done
+            elif [[ "${if_type}" == "phys-sriov" ]]; then
+                set_bandwidth "${host_ifname}" "${bandwidth}"
+            fi
+
+            # get guest int name
+            guest_ifname="$( get_guest_ifname "${host_ifname}" "${vlan}" )" || {
+                die 55 "${func_name}" "get_guest_ifname failed!"
+            }
+            # Create netns
+            [[ ! -d /var/run/netns ]] && mkdir -p /var/run/netns
+            rm -f "/var/run/netns/${nspid}"
+            ln -s "/proc/${nspid}/ns/net" "/var/run/netns/${nspid}"
+
+            # Link host interface to container net namespace
+            ip link set "${guest_ifname}" netns "${nspid}" || {
+                die 56 "${func_name}" "Link ${guest_ifname} to container failed"
+            }
+
+            # Rename container interface
+            ip netns exec "${nspid}" ip link set "${guest_ifname}" name "${container_ifname}" || {
+                die 57 "${func_name}" "Rename container interface failed"
+            }
+
+            # Add ip address to container interface
+            ip netns exec "${nspid}" ip addr add "${ip_addr}/${prefix}" dev "${container_ifname}" || {
+                die 58 "${func_name}" "Add ip address to container interface failed"
+            }
+
+            # set container interface up
+            ip netns exec "${nspid}" ip link set "${container_ifname}" up || {
+                die 59 "${func_name}" "ip link set interface up failed"
+            }
+
+            ip netns exec "${nspid}" ip route get "${gateway}" >/dev/null || \
+                ip netns exec "${nspid}" ip route add "${gateway}/32" dev "${container_ifname}" || {
+                die 60 "${func_name}" "Add route failed"
+            }
+
+            ip netns exec "${nspid}" ip route replace default via "${gateway}"  || {
+                die 61 "${func_name}" "Replace route to default route failed"
+            }
+
+            # Give our ARP neighbors a nudge about the new interface
+            if installed arping; then
+                ip netns exec "${nspid}" arping -c 1 -A -I "${container_ifname}" "$( echo "${ip_addr}" | cut -d/ -f1 )" > /dev/null
+            else
+                echo "Warning: arping not found; interface may not be immediately reachable"
+            fi
+
+            # Remove nspid to avoid `ip netns` catch it.
+            rm -f "/var/run/netns/${nspid}"
+
+            ((i++))
+        else
+            break
+        fi
+    done
+}
+
+network_list () {
+    local func_name="${FILE_NAME}.network_list"
+
+    local output='{"native_devices": []}'
+
+    local list
+    list="$( ls -d /sys/class/net/cbond* 2>/dev/null )"
+    for net in ${list}; do
+        local obj_output='{}'
+        local network_type='internal'
+        local device=${net##*/}
+        local type
+        type="$( get_interface_type "${device}" )"
+        if [[ "${type}" != "bond" ]] && [[ "${type}" != "phys" ]];then
+            continue
+        fi
+        obj_output="$( add_field "string" "name" "${device}" "${obj_output}" )" || {
+            die 41 "${func_name}" "append name failed: ${obj_output}"
+        }
+        obj_output="$( add_field "string" "type" "${type}" "${obj_output}" )" || {
+            die 42 "${func_name}" "append type failed: ${obj_output}"
+        }
+        obj_output="$( add_field "string" "network_type" "${network_type}" "${obj_output}" )" || {
+            die 42 "${func_name}" "append network_type failed: ${obj_output}"
+        }
+        output="$( jq --argjson append_string "${obj_output}" ".native_devices += [\$append_string]" <<< "${output}" )" || {
+            die 43 "${func_name}" "json append string failed!"
+        }
+    done
+
+    jq . <<< "${output}"
+}
+
+# ##############################################################################
+# The main() function is called at the end of the script.
+# only main function can use function( die ) and exit
+# ##############################################################################
+main () {
+    local func_name="${FILE_NAME}.main"
+
+    local object="${1}"
+    local action="${2}"
+
+    installed jq || {
+        die 21 "${func_name}" "Not install jq"
+    }
+
+    case "${object}" in
+        "network")
+            case "${action}" in
+                "add")
+                    local input="${3}"
+                    network_add "${input}"
+                    ;;
+                "list")
+                    network_list
+                    ;;
+                "details")
+                    network_details
+                    ;;
+                *)
+                    die 24 "${func_name}" "network action(${action}) nonsupport"
+                    ;;
+            esac
+            ;;
+        "version")
+            echo "${VERSION}"
+            exit 0
+            ;;
+        *)
+            die 25 "${func_name}" "object(${object}) nonsupport"
+            ;;
+    esac
+
+}
+
+main "${@:-""}"
+
+# ##############################################################################
+# Documentation
+# ##############################################################################
+:<<'DOCUMENTATION'
+================================================================================
+network add {{json_string}}
+input json example:
+{
+  "kube_dev_name": "eth0",
+  "network_namespace": "default",
+  "network_devices": [
+    {
+      "native_dev": "cbond001",
+      "ip_address": "192.168.100.100",
+      "prefix": 24,
+      "gateway": "192.168.100.1",
+      "vlan_id": 100,
+      "network_type": "internal",
+      "bandwidth_Mb": 100
+    }
+  ]
+}
+
+================================================================================
+network list
+output json example:
+{
+  "native_devices": [
+    {
+      "name": "cbond01",
+      "type": "bond",
+      "network_type": "internal"
+    },
+    {
+      "name": "eth0",
+      "type": "phys",
+      "network_type": "internal"
+    }
+  ]
+}
+
+DOCUMENTATION
