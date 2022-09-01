@@ -68,6 +68,6 @@ sea-coral监控基于prometheus,通过grafan界面进行展示
 
 ### 许可证
 
-[Apache License 2.0](./LICENSE)
+[Apache License 2.0](../LICENSE)
 
 #####
