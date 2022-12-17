@@ -1,7 +1,7 @@
 package bankend
 
 import (
-	"github.com/astaxie/beego/config"
+	"github.com/beego/beego/config"
 	"io/ioutil"
 	"os"
 	"strings"

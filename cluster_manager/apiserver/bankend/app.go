@@ -18,7 +18,7 @@ import (
 	"github.com/upmio/dbscale-kube/pkg/structs"
 	"github.com/upmio/dbscale-kube/pkg/vars"
 
-	"github.com/astaxie/beego/config"
+	"github.com/beego/beego/config"
 
 	"github.com/upmio/dbscale-kube/cluster_manager/apiserver/api"
 	"github.com/upmio/dbscale-kube/cluster_manager/apiserver/model"
