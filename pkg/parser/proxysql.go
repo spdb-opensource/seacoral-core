@@ -9,7 +9,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/astaxie/beego/config"
+	"github.com/beego/beego/config"
 	"github.com/pkg/errors"
 	unitv4 "github.com/upmio/dbscale-kube/pkg/apis/unit/v1alpha4"
 	corev1 "k8s.io/api/core/v1"

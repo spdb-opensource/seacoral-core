@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/astaxie/beego/config"
+	"github.com/beego/beego/config"
 	stderror "github.com/pkg/errors"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/util/uuid"
