@@ -4,8 +4,8 @@ go 1.14
 
 require (
 	github.com/Masterminds/squirrel v1.5.0
-	github.com/astaxie/beego v1.12.3
-	github.com/containernetworking/cni v0.7.1
+	github.com/beego/beego v1.12.11
+	github.com/containernetworking/cni v0.8.1
 	github.com/didip/tollbooth/v6 v6.1.0
 	github.com/docker/distribution v2.7.1+incompatible
 	github.com/emicklei/go-restful v2.13.0+incompatible
